@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using WepApiHacoupian.Models;
 
 namespace WebApiHacoupian.Services
@@ -16,7 +13,7 @@ namespace WebApiHacoupian.Services
         }
         public async Task<bool> Insert(TblInvoiceMasterRemain invoiceMasterRemain)
         {
-            if(invoiceMasterRemain != null)
+            if (invoiceMasterRemain != null)
             {
                 await _context.TblInvoiceMasterRemains.AddAsync(invoiceMasterRemain);
                 await _context.SaveChangesAsync();

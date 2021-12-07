@@ -74,6 +74,8 @@ namespace WepApiHacoupian
             services.AddTransient<IInvoiceMasterRemain, InvoiceMasterRemain>();
             services.AddTransient<IInvoiceSlave, InvoiceSlave>();
             services.AddTransient<IRegistrarType, RegistrarType>();
+            services.AddTransient<IFinishedGoodStockSheet, FinishedGoodStockSheet>();
+            services.AddTransient<IFinishedGoodStockSheetItem, FinishedGoodStockSheetItem>();
 
             services.AddCors(c =>
             {

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +15,12 @@ namespace WebApiHacoupian.Services
         {
             _context = context;
         }
+
+        public async Task<IEnumerable<TblInvoiceSlave>> GetInvoiceSlaves(long invoiceMasterId)
+        {
+            return await _context.TblInvoiceSlaves.Where(c => c.TblInvoiceMasterId == invoiceMasterId).ToListAsync();
+        }
+
         public async Task<bool> Insert(TblInvoiceSlave invoiceSlave)
         {
             if (invoiceSlave != null)

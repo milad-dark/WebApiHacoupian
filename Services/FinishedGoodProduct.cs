@@ -18,5 +18,10 @@ namespace WebApiHacoupian.Services
         {
             return await _context.TblFinishedGoodProducts.FirstOrDefaultAsync(f => f.Id == id);
         }
+
+        public async Task<TblFinishedGoodProduct> GetFinishedGoodProductByCode(string PartCode)
+        {
+            return await _context.TblFinishedGoodProducts.FirstOrDefaultAsync(f => f.Code == PartCode);
+        }
     }
 }

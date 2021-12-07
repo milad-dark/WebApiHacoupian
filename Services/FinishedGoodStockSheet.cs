@@ -4,19 +4,20 @@ using WepApiHacoupian.Models;
 
 namespace WebApiHacoupian.Services
 {
-    public class InvoiceMasterPrePayment : IInvoiceMasterPrePayment
+    public class FinishedGoodStockSheet : IFinishedGoodStockSheet
     {
         private readonly MainContext _context;
 
-        public InvoiceMasterPrePayment(MainContext context)
+        public FinishedGoodStockSheet(MainContext context)
         {
             _context = context;
         }
-        public async Task<bool> insert(TblInvoiceMasterPrepayment invoiceMasterPrepayment)
+
+        public async Task<bool> Insert(TblFinishedGoodStockSheet finishedGoodStockSheet)
         {
-            if (invoiceMasterPrepayment != null)
+            if (finishedGoodStockSheet != null)
             {
-                await _context.TblInvoiceMasterPrepayments.AddAsync(invoiceMasterPrepayment);
+                await _context.TblFinishedGoodStockSheets.AddAsync(finishedGoodStockSheet);
                 await _context.SaveChangesAsync();
                 return true;
             }

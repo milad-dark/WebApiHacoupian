@@ -22,6 +22,10 @@ namespace WebApiHacoupian.Controllers
         private readonly IInvoiceMasterPrePayment _invoiceMasterPrePayment;
         private readonly IInvoiceSlave _invoiceSlave;
         private readonly IRegistrarType _registrarType;
+        private readonly IFinishedGoodStockSheet _finishedGoodStockSheet;
+        private readonly IFinishedGoodStockSheetItem _finishedGoodStockSheetItem;
+        private readonly IFinishedGoodProduct _finishedGoodProduct;
+
         #endregion
         public InvoiceController(
             IPerson person,
@@ -30,7 +34,10 @@ namespace WebApiHacoupian.Controllers
             IInvoiceMasterPayment invoiceMasterPayment,
             IInvoiceMasterPrePayment invoiceMasterPrePayment,
             IInvoiceSlave invoiceSlave,
-            IRegistrarType registrarType)
+            IRegistrarType registrarType,
+            IFinishedGoodStockSheet finishedGoodStockSheet,
+            IFinishedGoodStockSheetItem finishedGoodStockSheetItem,
+            IFinishedGoodProduct finishedGoodProduct)
         {
             _person = person;
             _invoiceMaster = invoiceMaster;
@@ -39,6 +46,9 @@ namespace WebApiHacoupian.Controllers
             _invoiceMasterPrePayment = invoiceMasterPrePayment;
             _invoiceSlave = invoiceSlave;
             _registrarType = registrarType;
+            _finishedGoodStockSheet = finishedGoodStockSheet;
+            _finishedGoodStockSheetItem = finishedGoodStockSheetItem;
+            _finishedGoodProduct = finishedGoodProduct;
         }
 
         [HttpPost]
@@ -57,7 +67,7 @@ namespace WebApiHacoupian.Controllers
                     BadRequest("فاکتور فاقد پرداختی میباشد");
 
                 try
-                { 
+                {
                     var invoiceMaster = new TblInvoiceMaster
                     {
                         TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
@@ -99,6 +109,9 @@ namespace WebApiHacoupian.Controllers
                     InsertDiscounts(onlineShop.discounts, id);
                     //Insert Payment
                     InsertPayment(onlineShop.payment, id);
+                    //Insert Stock Sheet and Item
+                    var stockId = InsertStockSheet(invoiceMaster);
+                    InsertStockItem(await stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
                     return Ok($"InvoiceId: {id}");
                 }
@@ -183,6 +196,148 @@ namespace WebApiHacoupian.Controllers
                 }
                 await _invoiceMasterDiscount.Insert(lstDiscount);
             }
+        }
+        //Insert StockSheet
+        private async Task<long> InsertStockSheet(TblInvoiceMaster invoiceMaster)
+        {
+            string StoreCodeNew;
+            switch (invoiceMaster.TblInvoiceRegistrarId.ToString())
+            {
+
+                case "2":
+                    StoreCodeNew = "1953";
+                    break;
+                case "3":
+                    StoreCodeNew = "1957";
+                    break;
+                case "4":
+                    StoreCodeNew = "1964";
+                    break;
+                case "5":
+                    StoreCodeNew = "1988";
+                    break;
+                case "6":
+                    StoreCodeNew = "1968";
+                    break;
+                case "7":
+                    StoreCodeNew = "1963";
+                    break;
+                case "8":
+                    StoreCodeNew = "1998";
+                    break;
+                case "9":
+                    StoreCodeNew = "1955";
+                    break;
+                case "10":
+                    StoreCodeNew = "1983";
+                    break;
+                case "12":
+                    StoreCodeNew = "1954";
+                    break;
+                case "13":
+                    StoreCodeNew = "1971";
+                    break;
+                case "14":
+                    StoreCodeNew = "1979";
+                    break;
+                case "15":
+                    StoreCodeNew = "1994";
+                    break;
+                case "16":
+                    StoreCodeNew = "1948";
+                    break;
+                case "17":
+                    StoreCodeNew = "1986";
+                    break;
+                case "18":
+                    StoreCodeNew = "1992";
+                    break;
+                case "19":
+                    StoreCodeNew = "1973";
+                    break;
+                case "20":
+                    StoreCodeNew = "1960";
+                    break;
+                case "21":
+                    StoreCodeNew = "1961";
+                    break;
+                case "22":
+                    StoreCodeNew = "1943";
+                    break;
+                case "23":
+                    StoreCodeNew = "1996";
+                    break;
+                case "24":
+                    StoreCodeNew = "2000";
+                    break;
+                case "25":
+                    StoreCodeNew = "1965";
+                    break;
+                case "28":
+                    StoreCodeNew = "1975";
+                    break;
+                case "29":
+                    StoreCodeNew = "1970";
+                    break;
+                case "30":
+                    StoreCodeNew = "1990";
+                    break;
+                case "31":
+                    StoreCodeNew = "2640";
+                    break;
+                default:
+                    StoreCodeNew = "1935";
+                    break;
+            }
+
+            TblFinishedGoodStockSheet stockSheet = new()
+            {
+                TblCompanyIdAsOwner = 2,
+                TblCompanyIdAsReceiver = 12336,
+                TblCompanyIdAsIssuer = null,
+                TblPlaceTypeIdAsReceiver = null,
+                TblPlaceTypeIdAsIssuer = Convert.ToInt64(StoreCodeNew),
+                TblPersonIdAsIssuer = null,
+                TblPersonIdAsReceiver = null,
+                TblFinishedGoodStockSheetTypeId = 5,
+                TblFinishedGoodStockSheetSubTypeId = 5,
+                SheetIndex = 1,
+                SheetNumber = invoiceMaster.InvoiceNumber,
+                Date = invoiceMaster.InvoiceDate,
+                Explanation = "From Online Shop",
+                Status = 0,
+                Guid = Guid.NewGuid(),
+                IsSent = false,
+                IsDeleted = false,
+            };
+            await _finishedGoodStockSheet.Insert(stockSheet);
+            return stockSheet.Id;
+        }
+        private async void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
+        {
+            List<TblFinishedGoodStockSheetItem> lstStockItem = new List<TblFinishedGoodStockSheetItem>();
+            foreach (var item in invoiceSlave)
+            {
+                var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.PartCode).Result;
+
+                TblFinishedGoodStockSheetItem stockSheetItem = new()
+                {
+                    TblFinishedGoodStockSheetId = StockId,
+                    TblFinishedGoodProductId = finishedProduct.Id,
+                    TblOrderHeaderId = 19902,
+                    TblProductionOrderFinishedGoodProductsId = 24661,
+                    Count = item.PartCount,
+                    Price = item.SalePrice,
+                    ParentId = "",
+                    Explanation = "From Online Shop",
+                    Status = 0,
+                    Guid = Guid.NewGuid(),
+                    IsSent = false,
+                    IsDeleted = false
+                };
+                lstStockItem.Add(stockSheetItem);
+            }
+            await _finishedGoodStockSheetItem.Insert(lstStockItem);
         }
     }
 }

@@ -112,7 +112,7 @@ namespace WepApiHacoupian.Controllers
                     if (invoiceMaster == null)
                         return NotFound("اطلاعاتی یافت نشد");
 
-                    if(person.Count() == 0)
+                    if (person.Count() == 0)
                         return NotFound("اطلاعاتی یافت نشد");
 
                     CustomerFactureViewModel shop = new CustomerFactureViewModel
