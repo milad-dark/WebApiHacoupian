@@ -68,6 +68,12 @@ namespace WepApiHacoupian
             services.AddTransient<ICodingPatternValue, CodingPatternValue>();
             services.AddTransient<ICodingPatternValueType, CodingPatternValueType>();
             services.AddTransient<IInvoiceMaster, InvoiceMaster>();
+            services.AddTransient<IInvoiceMasterDiscount, InvoiceMasterDiscount>();
+            services.AddTransient<IInvoiceMasterPayment, InvoiceMasterPayment>();
+            services.AddTransient<IInvoiceMasterPrePayment, InvoiceMasterPrePayment>();
+            services.AddTransient<IInvoiceMasterRemain, InvoiceMasterRemain>();
+            services.AddTransient<IInvoiceSlave, InvoiceSlave>();
+            services.AddTransient<IRegistrarType, RegistrarType>();
 
             services.AddCors(c =>
             {

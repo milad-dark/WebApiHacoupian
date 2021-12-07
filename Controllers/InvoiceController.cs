@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.ViewModel;
@@ -11,9 +10,9 @@ using WepApiHacoupian.Models;
 
 namespace WebApiHacoupian.Controllers
 {
-    [EnableCors("myPolicy"), Route("api/[controller]/[action]")]
+    [EnableCors("myPolicy"), Route("api/[controller]")]
     [ApiController]
-    public class InvoiceController : Controller
+    public class InvoiceController : ControllerBase
     {
         #region Variables
         private readonly IPerson _person;
@@ -24,7 +23,14 @@ namespace WebApiHacoupian.Controllers
         private readonly IInvoiceSlave _invoiceSlave;
         private readonly IRegistrarType _registrarType;
         #endregion
-        public InvoiceController(IPerson person, IInvoiceMaster invoiceMaster, IInvoiceMasterDiscount invoiceMasterDiscount, IInvoiceMasterPayment invoiceMasterPayment, IInvoiceMasterPrePayment invoiceMasterPrePayment, IInvoiceSlave invoiceSlave, IRegistrarType registrarType)
+        public InvoiceController(
+            IPerson person,
+            IInvoiceMaster invoiceMaster,
+            IInvoiceMasterDiscount invoiceMasterDiscount,
+            IInvoiceMasterPayment invoiceMasterPayment,
+            IInvoiceMasterPrePayment invoiceMasterPrePayment,
+            IInvoiceSlave invoiceSlave,
+            IRegistrarType registrarType)
         {
             _person = person;
             _invoiceMaster = invoiceMaster;
@@ -34,95 +40,148 @@ namespace WebApiHacoupian.Controllers
             _invoiceSlave = invoiceSlave;
             _registrarType = registrarType;
         }
-        
 
         [HttpPost]
-        public async Task<ActionResult> SetOrders([FromBody] OnlineShopModel onlineShop)
+        public async Task<ActionResult> Post([FromBody] OnlineShopModel onlineShop)
         {
+            //1935 placeType and person 523841 zahedi and registrar 34
             if (ModelState.IsValid)
             {
-                
+                if (onlineShop.order_items.Count == 0)
+                    BadRequest("فاکتور بدون آیتم میباشد");
+                if (string.IsNullOrEmpty(onlineShop.user_name) || string.IsNullOrEmpty(onlineShop.user_code))
+                    BadRequest("تام مشترک یا کد مشترک خالی/صفر میباشد");
+                if (onlineShop.invoice_number == 0)
+                    BadRequest("فاکتور فاقد شماره میباشد");
+                if (onlineShop.payment == 0)
+                    BadRequest("فاکتور فاقد پرداختی میباشد");
+
+                try
+                { 
+                    var invoiceMaster = new TblInvoiceMaster
+                    {
+                        TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
+                        TblCompanyIdAsReceiver = onlineShop.orgin,
+                        TblCompanyIdAsIssuer = onlineShop.orgin,
+                        TblPlaceTypeIdAsIssuer = 1935,//فروشگاه آنلاین
+                        TblPlaceTypeIdAsReceiver = 1935,//فروشگاه آنلاین
+                        TblPersonIdAsIssuer = 523841,//زاهدی
+                        TblPersonIdAsReceiver = 523841,//زاهدی
+                        TblInitializedTypeId = 3,//فاکتور
+                        TblEffectiveTypeId = 2,//2=moshtarekin,4=moshtari adi,7=personel
+                        TblInvoiceRegistrarId = 34,//فروشگاه آنلاین
+                        TblInvoiceStatusId = 1,
+                        TblPersonId = 523841,
+                        InvoiceDate = Convert.ToDateTime(onlineShop.date).ToShamsi(),
+                        InvoiceDateTime = Convert.ToDateTime(onlineShop.date),
+                        InvoiceTime = Convert.ToDateTime(onlineShop.date).TimeOfDay,
+                        InvoiceNumber = onlineShop.invoice_number,
+                        InvoiceTo = onlineShop.user_name,
+                        ParentIdFromReturn = 0,
+                        ParentId = 0,
+                        EffectiveCode = onlineShop.user_code,
+                        Comment = "mobile",
+                        TaxPercent = onlineShop.tax_percent.ToString(),
+                        Tax = onlineShop.tax_price.ToString(),
+                        CanBeReturned = false,
+                        Explanation = "From Online Shop",
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _invoiceMaster.Insert(invoiceMaster);
+                    var id = invoiceMaster.Id;
+
+                    //Insert Slave
+                    InsertSlaves(onlineShop.order_items, id);
+                    //Insert Discount
+                    InsertDiscounts(onlineShop.discounts, id);
+                    //Insert Payment
+                    InsertPayment(onlineShop.payment, id);
+
+                    return Ok($"InvoiceId: {id}");
+                }
+                catch (Exception ex)
+                {
+                    BadRequest(ex.Message);
+                }
             }
-            return BadRequest();
+            return BadRequest("داده های ارسالی اشتباه میباشد");
         }
         //Insert Order Items To TblInvoiceSlave
-        public async void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
+        private async void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
         {
-            if (ModelState.IsValid)
+            if (invoiceSlave.Count > 0)
             {
-                if(invoiceSlave.Count > 0)
+                int indexItem = 1;
+                foreach (var item in invoiceSlave)
                 {
-                    int indexItem = 1;
-                    foreach (var item in invoiceSlave)
+                    TblInvoiceSlave slave = new()
                     {
-                        TblInvoiceSlave slave = new()
-                        {
-                            TblInvoiceMasterId = invoiceMasterId,
-                            PartCode = item.barcode,
-                            PartCount = item.count,
-                            ItemIndex = indexItem,
-                            SalePrice = (long)item.price,
-                            PartTax = (long)item.tax_price,
-                            PartDiscount = 0,
-                            Explanation = "From Online Shop",
-                            IsGift = false,
-                            Status = 1,
-                            Guid = new Guid(),
-                            IsDeleted = false,
-                            IsSent = false
-                        };
-                        await _invoiceSlave.Insert(slave);
-                        indexItem++;
-                    }
+                        TblInvoiceMasterId = invoiceMasterId,
+                        PartCode = item.barcode,
+                        PartCount = item.count,
+                        ItemIndex = indexItem,
+                        SalePrice = (long)item.price,
+                        PartTax = (long)item.tax_price,
+                        PartDiscount = 0,
+                        Explanation = "From Online Shop",
+                        IsGift = false,
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsDeleted = false,
+                        IsSent = false
+                    };
+                    await _invoiceSlave.Insert(slave);
+                    indexItem++;
                 }
             }
         }
         //Insert Payment Order To TblInvoiceMasterPayment
-        public async void InsertPayment(double amount, long invoiceMasterId)
+        private async void InsertPayment(double amount, long invoiceMasterId)
         {
-            if (ModelState.IsValid)
+            if (amount > 0)
             {
-                if (amount > 0)
+                TblInvoiceMasterPayment payment = new()
                 {
-                        TblInvoiceMasterPayment payment = new()
-                        {
-                            TblInvoiceMasterId = invoiceMasterId,
-                            Amount = (long)amount,
-                            Explanation = "From Online Shop",                           
-                            Status = 1,
-                            Guid = new Guid(),
-                            IsDeleted = false,
-                            IsSent = false
-                        };
-                        await _invoiceMasterPayment.Insert(payment);                    
-                }
+                    TblInvoiceMasterId = invoiceMasterId,
+                    Amount = (long)amount,
+                    TblPaymentTypeId = 1,
+                    Explanation = "From Online Shop",
+                    Status = 1,
+                    Guid = Guid.NewGuid(),
+                    IsDeleted = false,
+                    IsSent = false
+                };
+                await _invoiceMasterPayment.Insert(payment);
             }
+
         }
         //Insert Discounts Order To TblInvoiceMasterDiscount
-        public async void InsertDiscounts(List<Discounts> discounts, long invoiceMasterId)
+        private async void InsertDiscounts(List<Discounts> discounts, long invoiceMasterId)
         {
-            if (ModelState.IsValid)
+            if (discounts.Count > 0)
             {
-                if (discounts.Count > 0)
+                List<TblInvoiceMasterDiscount> lstDiscount = new List<TblInvoiceMasterDiscount>();
+                foreach (var item in discounts)
                 {
-                    foreach (var item in discounts)
+                    TblInvoiceMasterDiscount discount = new()
                     {
-                        TblInvoiceMasterDiscount discount = new()
-                        {
-                            TblInvoiceMasterId = invoiceMasterId,
-                            TblDiscountTypeId = item.type,
-                            Amount = (long)item.price,
-                            CardNumber = ";0;",
-                            DiscountPercent = "0",
-                            Explanation = "From Online Shop",
-                            Status = 1,
-                            Guid = new Guid(),
-                            IsDeleted = false,
-                            IsSent = false
-                        };
-                        await _invoiceMasterDiscount.Insert(discount);
-                    }
+                        TblInvoiceMasterId = invoiceMasterId,
+                        TblDiscountTypeId = item.type,
+                        Amount = (long)item.price,
+                        CardNumber = ";0;",
+                        DiscountPercent = "0",
+                        Explanation = "From Online Shop",
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsDeleted = false,
+                        IsSent = false
+                    };
+                    lstDiscount.Add(discount);
                 }
+                await _invoiceMasterDiscount.Insert(lstDiscount);
             }
         }
     }

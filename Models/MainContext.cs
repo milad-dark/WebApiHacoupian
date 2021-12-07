@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 #nullable disable
 
 namespace WepApiHacoupian.Models
@@ -418,7 +417,13 @@ namespace WepApiHacoupian.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            //if (optionsBuilder.IsConfigured)
+            //{
+            //    optionsBuilder.UseSqlServer(Configuration.GetConnectionString("DBConnection"),
+            //     builder => builder.EnableRetryOnFailure())
+            //     .ConfigureWarnings(warnings => warnings.Throw(RelationalEventId.QueryClientEvaluationWarning));
 
+            //}
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace WebApiHacoupian.ViewModel
 {
@@ -8,15 +9,13 @@ namespace WebApiHacoupian.ViewModel
     public class OnlineShopModel
     {
         //Customer Code
-        public int user_code { get; set; }
+        public string user_code { get; set; }
         //Customer Name
         public string user_name { get; set; }
-        //Created Date '1400/08/01'
+        //Created DateTime
         public string date { get; set; }
-        //created Time '20:05:01.145233'
-        public string time { get; set; }
         //Invoice Number '223'
-        public string invoice_number { get; set; }
+        public long invoice_number { get; set; }
         //Tax percent for invoice '9% or 0.09'
         public double tax_percent { get; set; }
         //Tax Price invoice '1240000 R'

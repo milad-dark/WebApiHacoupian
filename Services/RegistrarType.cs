@@ -23,5 +23,15 @@ namespace WebApiHacoupian.Services
         {
             return await _context.TblRegistrarTypes.FirstOrDefaultAsync(r => r.RegistrarTypeName == name);
         }
+
+        TblRegistrarType IRegistrarType.SelectById(long id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        TblRegistrarType IRegistrarType.SelectByName(string name)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
