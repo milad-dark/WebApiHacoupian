@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WepApiHacoupian.ViewModel
+namespace WebApiHacoupian.ViewModel
 {
     public class CustomerViewModel
     {
@@ -12,6 +12,7 @@ namespace WepApiHacoupian.ViewModel
         public string MarriageDate { get; set; }
         public string Email { get; set; }
         public string Status { get; set; }
+        public string Code { get; set; }
         //Address Is (ProviceCode,ProvinceName,CityName,PostalCode,AddressLine
         public List<AddressViewModel> Address { get; set; }
         //Phone Is (PhoneType,Number)

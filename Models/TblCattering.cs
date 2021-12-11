@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace WepApiHacoupian.Models
+namespace WebApiHacoupian.Models
 {
     public partial class TblCattering
     {

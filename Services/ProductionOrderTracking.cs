@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Services
 {

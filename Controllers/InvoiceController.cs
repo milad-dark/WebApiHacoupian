@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.ViewModel;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Controllers
 {
@@ -73,8 +72,8 @@ namespace WebApiHacoupian.Controllers
                         TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
                         TblCompanyIdAsReceiver = onlineShop.orgin,
                         TblCompanyIdAsIssuer = onlineShop.orgin,
-                        TblPlaceTypeIdAsIssuer = 1935,//فروشگاه آنلاین
-                        TblPlaceTypeIdAsReceiver = 1935,//فروشگاه آنلاین
+                        TblPlaceTypeIdAsIssuer = 2947,//فروشگاه آنلاین (2948)
+                        TblPlaceTypeIdAsReceiver = 2947,//فروشگاه آنلاین (2948)
                         TblPersonIdAsIssuer = 523841,//زاهدی
                         TblPersonIdAsReceiver = 523841,//زاهدی
                         TblInitializedTypeId = 3,//فاکتور
@@ -111,7 +110,7 @@ namespace WebApiHacoupian.Controllers
                     InsertPayment(onlineShop.payment, id);
                     //Insert Stock Sheet and Item
                     var stockId = InsertStockSheet(invoiceMaster);
-                    InsertStockItem(await stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
+                    InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
                     return Ok($"InvoiceId: {id}");
                 }
@@ -123,7 +122,7 @@ namespace WebApiHacoupian.Controllers
             return BadRequest("داده های ارسالی اشتباه میباشد");
         }
         //Insert Order Items To TblInvoiceSlave
-        private async void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
+        private void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
         {
             if (invoiceSlave.Count > 0)
             {
@@ -146,13 +145,13 @@ namespace WebApiHacoupian.Controllers
                         IsDeleted = false,
                         IsSent = false
                     };
-                    await _invoiceSlave.Insert(slave);
+                    _invoiceSlave.Insert(slave);
                     indexItem++;
                 }
             }
         }
         //Insert Payment Order To TblInvoiceMasterPayment
-        private async void InsertPayment(double amount, long invoiceMasterId)
+        private void InsertPayment(double amount, long invoiceMasterId)
         {
             if (amount > 0)
             {
@@ -167,12 +166,12 @@ namespace WebApiHacoupian.Controllers
                     IsDeleted = false,
                     IsSent = false
                 };
-                await _invoiceMasterPayment.Insert(payment);
+                _invoiceMasterPayment.Insert(payment).ConfigureAwait(false);
             }
 
         }
         //Insert Discounts Order To TblInvoiceMasterDiscount
-        private async void InsertDiscounts(List<Discounts> discounts, long invoiceMasterId)
+        private void InsertDiscounts(List<Discounts> discounts, long invoiceMasterId)
         {
             if (discounts.Count > 0)
             {
@@ -194,11 +193,11 @@ namespace WebApiHacoupian.Controllers
                     };
                     lstDiscount.Add(discount);
                 }
-                await _invoiceMasterDiscount.Insert(lstDiscount);
+                _invoiceMasterDiscount.Insert(lstDiscount).ConfigureAwait(false);
             }
         }
         //Insert StockSheet
-        private async Task<long> InsertStockSheet(TblInvoiceMaster invoiceMaster)
+        private long InsertStockSheet(TblInvoiceMaster invoiceMaster)
         {
             string StoreCodeNew;
             switch (invoiceMaster.TblInvoiceRegistrarId.ToString())
@@ -285,6 +284,9 @@ namespace WebApiHacoupian.Controllers
                 case "31":
                     StoreCodeNew = "2640";
                     break;
+                case "34":
+                    StoreCodeNew = "2947";//2948 در دیتابیس اصلی
+                    break;
                 default:
                     StoreCodeNew = "1935";
                     break;
@@ -310,10 +312,10 @@ namespace WebApiHacoupian.Controllers
                 IsSent = false,
                 IsDeleted = false,
             };
-            await _finishedGoodStockSheet.Insert(stockSheet);
+            _finishedGoodStockSheet.Insert(stockSheet).ConfigureAwait(false);
             return stockSheet.Id;
         }
-        private async void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
+        private void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
         {
             List<TblFinishedGoodStockSheetItem> lstStockItem = new List<TblFinishedGoodStockSheetItem>();
             foreach (var item in invoiceSlave)
@@ -337,7 +339,7 @@ namespace WebApiHacoupian.Controllers
                 };
                 lstStockItem.Add(stockSheetItem);
             }
-            await _finishedGoodStockSheetItem.Insert(lstStockItem);
+            _finishedGoodStockSheetItem.Insert(lstStockItem).ConfigureAwait(false);
         }
     }
 }

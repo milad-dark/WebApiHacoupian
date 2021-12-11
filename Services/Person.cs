@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Interfaces;
+using WebApiHacoupian.Models;
 
-namespace WepApiHacoupian.Services
+namespace WebApiHacoupian.Services
 {
     public class Person : IPerson
     {
@@ -30,11 +30,6 @@ namespace WepApiHacoupian.Services
         public async Task<IEnumerable<TblPerson>> SelectAllPerson(int take, int id)
         {
             return await _context.TblPeople.Where(p => p.Id >= id).Take(take).ToListAsync();
-        }
-
-        public async Task<IEnumerable<TblPerson>> SelectByBirthDay(string beginDate, string endDate, int take)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectByCity(int cityCode, int take)
@@ -77,6 +72,22 @@ namespace WepApiHacoupian.Services
         public async Task<IEnumerable<TblPerson>> SelectPersonByCodeList(long code)
         {
             return await _context.TblPeople.Where(p => p.Code == code).ToListAsync();
+        }
+
+        public async Task<bool> Insert(TblPerson person)
+        {
+            if (person != null)
+            {
+                await _context.TblPeople.AddAsync(person);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public Task<IEnumerable<TblPerson>> SelectByBirthDay(string beginDate, string endDate, int take)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace WepApiHacoupian.ViewModel
+﻿namespace WebApiHacoupian.ViewModel
 {
     public class PersonViewModel
     {
@@ -32,6 +32,18 @@
         {
             public int Id { get; set; }
             public string Role { get; set; }
+
+        }
+
+        public class CustomerAdd
+        {
+            public string name { get; set; }
+            public string last_name { get; set; }
+            public string mobile { get; set; }
+            public string national_code { get; set; }
+            public string birthdate { get; set; }
+            public bool sex { get; set; }
+            public string password { get; set; }
 
         }
     }

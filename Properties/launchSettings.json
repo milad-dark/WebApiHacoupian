@@ -23,7 +23,7 @@
       "nativeDebugging": true,
       "jsWebView2Debugging": false
     },
-    "WepApiHacoupian": {
+    "WebApiHacoupian": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

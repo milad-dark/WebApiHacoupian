@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Interfaces;
+using WebApiHacoupian.Models;
 
-namespace WepApiHacoupian.Services
+namespace WebApiHacoupian.Services
 {
     public class Province : IProvince
     {

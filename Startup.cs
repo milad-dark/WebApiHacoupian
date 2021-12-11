@@ -12,11 +12,9 @@ using System;
 using System.Text;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Services;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
-using WepApiHacoupian.Services;
+using WebApiHacoupian.Models;
 
-namespace WepApiHacoupian
+namespace WebApiHacoupian
 {
     public class Startup
     {
@@ -47,6 +45,7 @@ namespace WepApiHacoupian
                    options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
             //Add Interface and Service To Core
+            services.AddTransient<MainContext>();
             services.AddTransient<IPerson, Person>();
             services.AddTransient<IPersonRole, PersonRole>();
             services.AddTransient<ICertificate, Certificate>();

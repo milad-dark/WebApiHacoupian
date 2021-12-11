@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Models;
 
-namespace WepApiHacoupian.Interfaces
+namespace WebApiHacoupian.Interfaces
 {
     public interface IPhone
     {
@@ -18,5 +18,7 @@ namespace WepApiHacoupian.Interfaces
         /// <param name="phone"></param>
         /// <returns></returns>
         Task<IEnumerable<TblPhone>> SelectByNumber(string phone);
+
+        Task<bool> Insert(TblPhone phone);
     }
 }

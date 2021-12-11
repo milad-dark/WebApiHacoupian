@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Interfaces
 {

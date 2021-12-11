@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
-using WepApiHacoupian.Extention;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.ViewModel;
+using WebApiHacoupian.Extention;
+using WebApiHacoupian.Interfaces;
+using WebApiHacoupian.ViewModel;
 
-namespace WepApiHacoupian.Controllers
+namespace WebApiHacoupian.Controllers
 {
     [EnableCors("myPolicy"), Route("api/[controller]/[action]")]
     [ApiController]

@@ -1,6 +1,6 @@
 ﻿#nullable disable
 
-namespace WepApiHacoupian.Models
+namespace WebApiHacoupian.Models
 {
     public partial class ViewInvoiceSlave
     {

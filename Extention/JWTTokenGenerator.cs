@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace WepApiHacoupian.Extention
+namespace WebApiHacoupian.Extention
 {
     public class JWTTokenGenerator
     {

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Interfaces;
+using WebApiHacoupian.Models;
 
-namespace WepApiHacoupian.Services
+namespace WebApiHacoupian.Services
 {
     public class Phone : IPhone
     {
@@ -23,6 +23,17 @@ namespace WepApiHacoupian.Services
         public async Task<IEnumerable<TblPhone>> SelectByNumber(string phone)
         {
             return await _context.TblPhones.Where(p => p.Number == phone).ToListAsync();
+        }
+
+        public async Task<bool> Insert(TblPhone phone)
+        {
+            if (phone != null)
+            {
+                await _context.TblPhones.AddAsync(phone);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

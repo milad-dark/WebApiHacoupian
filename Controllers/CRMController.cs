@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
-using WepApiHacoupian.Interfaces;
-using WepApiHacoupian.Models;
-using WepApiHacoupian.ViewModel;
+using WebApiHacoupian.Models;
+using WebApiHacoupian.ViewModel;
 
-namespace WepApiHacoupian.Controllers
+namespace WebApiHacoupian.Controllers
 {
     [EnableCors("myPolicy"), Route("api/[controller]/[action]")]
     [ApiController]
@@ -128,6 +128,32 @@ namespace WepApiHacoupian.Controllers
             return BadRequest("داده ارسالی اشتباه است");
         }
 
+        [HttpGet]
+        public async Task<ActionResult> InsertCustomer([FromBody] PersonViewModel.CustomerAdd customer)
+        {
+            if (ModelState.IsValid)
+            {
+                TblPerson person = new()
+                {
+                    FirstName = customer.name,
+                    LastName = customer.last_name,
+                    FatherName = "FatherName",
+                    Password = customer.password,
+                    NationalCode = customer.national_code,
+                    BirthDate = customer.birthdate,
+                    Sex = customer.sex,
+                    TblPersonTypeId = 100,
+                    TblCountryIdAsNationality = 1,
+                    TblMarriageStatusId = 5,
+                    TblMilitaryServiceId = 12,
+                    TblReligionId = 58,
+                    TblJobId = 143,
+                    BirthCertificateNumber = "1234567890",
+                    IssueDate = DateTime.Now.ToShamsi()
+                };
+            }
+            return BadRequest();
+        }
         //Search In DataBase Person by Input Value
         private async Task<List<CustomerViewModel>> SearchPerson(IEnumerable<TblPerson> person)
         {
@@ -163,7 +189,8 @@ namespace WepApiHacoupian.Controllers
                     NationalCode = item.NationalCode,
                     Address = placeTypes,
                     Phones = phoneTypes,
-                    Certificate = certificates
+                    Certificate = certificates,
+                    Code = item.Code.ToString()
                 };
 
                 customers.Add(new CustomerViewModel

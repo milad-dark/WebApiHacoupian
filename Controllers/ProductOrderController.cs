@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.ViewModel;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Controllers
 {

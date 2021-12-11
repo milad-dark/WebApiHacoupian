@@ -1,4 +1,4 @@
-﻿using WepApiHacoupian.Models;
+﻿using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Interfaces
 {

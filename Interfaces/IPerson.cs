@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using WepApiHacoupian.Models;
+using WebApiHacoupian.Models;
 
-namespace WepApiHacoupian.Interfaces
+namespace WebApiHacoupian.Interfaces
 {
     public interface IPerson
     {
@@ -86,5 +86,6 @@ namespace WepApiHacoupian.Interfaces
         /// <returns></returns>
         Task<IEnumerable<TblPerson>> SelectPersonByNationalCode(string nationalCode);
 
+        Task<bool> Insert(TblPerson person);
     }
 }

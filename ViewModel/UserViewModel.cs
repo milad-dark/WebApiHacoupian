@@ -1,4 +1,4 @@
-﻿namespace WepApiHacoupian.ViewModel
+﻿namespace WebApiHacoupian.ViewModel
 {
     public class UserViewModel
     {
