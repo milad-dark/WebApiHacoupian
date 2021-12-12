@@ -128,31 +128,71 @@ namespace WebApiHacoupian.Controllers
             return BadRequest("داده ارسالی اشتباه است");
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult> InsertCustomer([FromBody] PersonViewModel.CustomerAdd customer)
         {
             if (ModelState.IsValid)
             {
-                TblPerson person = new()
+                var lastPerson = _person.SelectLastPerson();
+                var lastCode = lastPerson.Result.Code + 1;
+                try
                 {
-                    FirstName = customer.name,
-                    LastName = customer.last_name,
-                    FatherName = "FatherName",
-                    Password = customer.password,
-                    NationalCode = customer.national_code,
-                    BirthDate = customer.birthdate,
-                    Sex = customer.sex,
-                    TblPersonTypeId = 100,
-                    TblCountryIdAsNationality = 1,
-                    TblMarriageStatusId = 5,
-                    TblMilitaryServiceId = 12,
-                    TblReligionId = 58,
-                    TblJobId = 143,
-                    BirthCertificateNumber = "1234567890",
-                    IssueDate = DateTime.Now.ToShamsi()
-                };
+                    TblPerson person = new()
+                    {
+                        FirstName = customer.name,
+                        LastName = customer.last_name,
+                        FatherName = "FatherName",
+                        Password = customer.password,
+                        NationalCode = customer.national_code,
+                        BirthDate = Convert.ToDateTime(customer.birthdate).ToShamsi(),
+                        Sex = customer.sex,
+                        TblPersonTypeId = 100,
+                        TblCountryIdAsNationality = 1,
+                        TblCityIdAsIssuePlace=1,
+                        TblCityIdAsBirthPlace=1,
+                        TblMarriageStatusId = 5,
+                        TblMilitaryServiceId = 12,
+                        TblReligionId = 58,
+                        TblJobId = 143,
+                        BirthCertificateNumber = "1234567890",
+                        IssueDate = DateTime.Now.ToShamsi(),
+                        Email = "",
+                        GetEmail = false,
+                        GetSms = true,
+                        Nfc = "",
+                        Explanation = "#LogedUserFromOnlineShop",
+                        Status = 4,
+                        DeathDate = "",
+                        MarriageDate = "",
+                        CardNumber = 0,
+                        Code = lastCode,
+                        FileNumber = 0,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _person.Insert(person);
+
+                    TblPhone phone = new()
+                    {
+                        TblPersonId = person.Id,
+                        TblPhoneTypeId = 32,
+                        Number = customer.mobile,
+                        Explanation = customer.name + " " + customer.last_name,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _phone.Insert(phone);
+
+                    return Ok("Inserted. UserId: " + person.Id);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
             }
-            return BadRequest();
+            return BadRequest("اطلاعات ارسالی اشتباه است");
         }
         //Search In DataBase Person by Input Value
         private async Task<List<CustomerViewModel>> SearchPerson(IEnumerable<TblPerson> person)

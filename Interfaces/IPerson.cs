@@ -13,7 +13,7 @@ namespace WebApiHacoupian.Interfaces
         /// <returns>Person</returns>
         Task<TblPerson> SelectPersonByCode(long code);
         Task<IEnumerable<TblPerson>> SelectPersonByCodeList(long code);
-
+        Task<TblPerson> SelectLastPerson();
         /// <summary>
         /// Select All Person By Sex Code
         /// </summary>

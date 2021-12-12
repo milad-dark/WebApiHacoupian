@@ -89,5 +89,10 @@ namespace WebApiHacoupian.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<TblPerson> SelectLastPerson()
+        {
+            return await _context.TblPeople.OrderByDescending(p=>p.Id).FirstAsync();
+        }
     }
 }
