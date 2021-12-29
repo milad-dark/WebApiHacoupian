@@ -20,5 +20,6 @@ namespace WebApiHacoupian.Interfaces
         Task<IEnumerable<TblPhone>> SelectByNumber(string phone);
 
         Task<bool> Insert(TblPhone phone);
+        Task<bool> Update(TblPhone phone);
     }
 }

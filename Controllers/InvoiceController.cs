@@ -67,6 +67,12 @@ namespace WebApiHacoupian.Controllers
 
                 try
                 {
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(Convert.ToDateTime(onlineShop.date).ToShamsi());
+                    double totalTax = 0; 
+                    foreach (var item in onlineShop.order_items)
+                    {
+                        totalTax += item.price * 0.09;
+                    }
                     var invoiceMaster = new TblInvoiceMaster
                     {
                         TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
@@ -84,14 +90,14 @@ namespace WebApiHacoupian.Controllers
                         InvoiceDate = Convert.ToDateTime(onlineShop.date).ToShamsi(),
                         InvoiceDateTime = Convert.ToDateTime(onlineShop.date),
                         InvoiceTime = Convert.ToDateTime(onlineShop.date).TimeOfDay,
-                        InvoiceNumber = onlineShop.invoice_number,
+                        InvoiceNumber = lastInvoice.Result.InvoiceNumber + 1,
                         InvoiceTo = onlineShop.user_name,
                         ParentIdFromReturn = 0,
                         ParentId = 0,
                         EffectiveCode = onlineShop.user_code,
-                        Comment = "mobile",
-                        TaxPercent = onlineShop.tax_percent.ToString(),
-                        Tax = onlineShop.tax_price.ToString(),
+                        Comment = onlineShop.invoice_number.ToString(),
+                        TaxPercent = "0.09",
+                        Tax = totalTax.ToString(),
                         CanBeReturned = false,
                         Explanation = "From Online Shop",
                         Status = 1,
@@ -136,7 +142,7 @@ namespace WebApiHacoupian.Controllers
                         PartCount = item.count,
                         ItemIndex = indexItem,
                         SalePrice = (long)item.price,
-                        PartTax = (long)item.tax_price,
+                        PartTax = (long)(item.price * 0.09),
                         PartDiscount = 0,
                         Explanation = "From Online Shop",
                         IsGift = false,

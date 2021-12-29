@@ -56,7 +56,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblPerson>> SelectPersonByName(string firstName, string lastName)
         {
-            return await _context.TblPeople.Where(p => p.FirstName == firstName && p.LastName == lastName).ToListAsync();
+            return await _context.TblPeople.Where(p => p.FirstName.Contains(firstName) && p.LastName.Contains(lastName)).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonById(long id)
@@ -93,6 +93,17 @@ namespace WebApiHacoupian.Services
         public async Task<TblPerson> SelectLastPerson()
         {
             return await _context.TblPeople.OrderByDescending(p=>p.Id).FirstAsync();
+        }
+
+        public async Task<bool> Update(TblPerson person)
+        {
+            if (person != null)
+            {
+                _context.Update(person);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

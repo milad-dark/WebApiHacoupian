@@ -15,9 +15,31 @@ namespace WebApiHacoupian.Services
             _context = context;
         }
 
+        public async Task<bool> Insert(TblPlace place)
+        {
+            if (place != null)
+            {
+                await _context.TblPlaces.AddAsync(place);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+
         public async Task<IEnumerable<TblPlace>> SelectPlaceByPersonId(long personId)
         {
             return await _context.TblPlaces.Where(p => p.TblPersonId == personId).ToListAsync();
+        }
+
+        public async Task<bool> Update(TblPlace place)
+        {
+            if (place != null)
+            {
+                _context.Update(place);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
     }
 }

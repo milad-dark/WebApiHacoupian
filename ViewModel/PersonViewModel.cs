@@ -1,4 +1,5 @@
-﻿namespace WebApiHacoupian.ViewModel
+﻿using System.ComponentModel.DataAnnotations;
+namespace WebApiHacoupian.ViewModel
 {
     public class PersonViewModel
     {
@@ -42,9 +43,16 @@
             public string mobile { get; set; }
             public string national_code { get; set; }
             public string birthdate { get; set; }
+            public string email { get; set; }
             public bool sex { get; set; }
-            public string password { get; set; }
-
+            public string cityName { get; set; }
+            public string postalCode { get; set; }
+            public string address { get; set; }
+        }
+        public class CustomerAddView
+        {
+            public long user_id { get; set; }
+            public long user_code { get; set; }
         }
     }
 }

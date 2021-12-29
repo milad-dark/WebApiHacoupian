@@ -15,10 +15,6 @@ namespace WebApiHacoupian.ViewModel
         public string date { get; set; }
         //Invoice Number '223'
         public long invoice_number { get; set; }
-        //Tax percent for invoice '9% or 0.09'
-        public double tax_percent { get; set; }
-        //Tax Price invoice '1240000 R'
-        public double tax_price { get; set; }
         //Invoice Price Payment '105840000 R'
         public double payment { get; set; }
         //Company Order '2 is hacoupian Or 907 norashen'
@@ -33,7 +29,6 @@ namespace WebApiHacoupian.ViewModel
     {
         public int type { get; set; }
         public double price { get; set; }
-
     }
     public class InvoiceSlave
     {
@@ -41,7 +36,5 @@ namespace WebApiHacoupian.ViewModel
         public string name { get; set; }
         public int count { get; set; }
         public double price { get; set; }
-        public double tax_price { get; set; }
-
     }
 }

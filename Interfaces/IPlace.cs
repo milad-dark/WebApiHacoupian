@@ -12,5 +12,8 @@ namespace WebApiHacoupian.Interfaces
         /// <param name="personId"></param>
         /// <returns></returns>
         Task<IEnumerable<TblPlace>> SelectPlaceByPersonId(long personId);
+        
+        Task<bool> Insert(TblPlace place);
+        Task<bool> Update(TblPlace place);
     }
 }

@@ -35,5 +35,16 @@ namespace WebApiHacoupian.Services
             }
             return false;
         }
+
+        public async Task<bool> Update(TblPhone phone)
+        {
+            if (phone != null)
+            {
+                _context.Update(phone);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
     }
 }

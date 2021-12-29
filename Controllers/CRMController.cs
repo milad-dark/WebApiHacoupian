@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
@@ -134,6 +133,16 @@ namespace WebApiHacoupian.Controllers
         {
             if (ModelState.IsValid)
             {
+                //var isExistNational = await _person.SelectPersonByNationalCode(customer.national_code);
+                //var isExistName = await _person.SelectPersonByName(customer.name, customer.last_name);
+
+                var isExistPhone = await _phone.SelectByNumber(customer.mobile);
+                if (isExistPhone.Count() > 0)
+                {
+                   var updated = UpdateCustomer(customer).Result;
+                    return  updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : BadRequest("error in update");
+                }
+
                 var lastPerson = _person.SelectLastPerson();
                 var lastCode = lastPerson.Result.Code + 1;
                 try
@@ -143,21 +152,21 @@ namespace WebApiHacoupian.Controllers
                         FirstName = customer.name,
                         LastName = customer.last_name,
                         FatherName = "FatherName",
-                        Password = customer.password,
+                        Password = "",
                         NationalCode = customer.national_code,
                         BirthDate = Convert.ToDateTime(customer.birthdate).ToShamsi(),
                         Sex = customer.sex,
                         TblPersonTypeId = 100,
                         TblCountryIdAsNationality = 1,
-                        TblCityIdAsIssuePlace=1,
-                        TblCityIdAsBirthPlace=1,
+                        TblCityIdAsIssuePlace = 1,
+                        TblCityIdAsBirthPlace = 1,
                         TblMarriageStatusId = 5,
                         TblMilitaryServiceId = 12,
                         TblReligionId = 58,
                         TblJobId = 143,
                         BirthCertificateNumber = "1234567890",
                         IssueDate = DateTime.Now.ToShamsi(),
-                        Email = "",
+                        Email = customer.email,
                         GetEmail = false,
                         GetSms = true,
                         Nfc = "",
@@ -186,7 +195,27 @@ namespace WebApiHacoupian.Controllers
                     };
                     await _phone.Insert(phone);
 
-                    return Ok("Inserted. UserId: " + person.Id);
+                    var cityId = _city.SelectCityIdByCityName(customer.cityName).Result;
+                    TblPlace place = new()
+                    {
+                        TblPersonId = person.Id,
+                        TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
+                        TblPlaceTypeId = 1908,
+                        TblDistrictId = 3, //نامشخص
+                        PostalCode = customer.postalCode,
+                        AddressLine = customer.address,
+                        Settelment = "",
+                        Latitude = "0.0",
+                        Longitude = "0.0",
+                        Explanation = "From Online Shop",
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _place.Insert(place);
+
+                    return Ok(new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code });
                 }
                 catch (Exception ex)
                 {
@@ -195,7 +224,7 @@ namespace WebApiHacoupian.Controllers
             }
             return BadRequest("اطلاعات ارسالی اشتباه است");
         }
-    
+
         //Search In DataBase Person by Input Value
         private async Task<List<CustomerViewModel>> SearchPerson(IEnumerable<TblPerson> person)
         {
@@ -294,6 +323,61 @@ namespace WebApiHacoupian.Controllers
                 ProvinceName = _province.SelectProviceById(_city.SelectCityNameById(p.TblCityId).Result.TblProvinceId).Result.ProvinceName,
                 ProvinceCode = _province.SelectProviceById(_city.SelectCityNameById(p.TblCityId).Result.TblProvinceId).Result.ProvinceCode
             }).ToList());
+        }
+
+        //Update Customer
+        private async Task<PersonViewModel.CustomerAddView> UpdateCustomer(PersonViewModel.CustomerAdd customer)
+        {
+            if (ModelState.IsValid)
+            {
+                if (string.IsNullOrEmpty(customer.mobile))
+                    return new PersonViewModel.CustomerAddView() { user_id = 0, user_code = 0 };
+
+                var phones = await _phone.SelectByNumber(customer.mobile);
+                var cityId = await _city.SelectCityIdByCityName(customer.cityName);
+
+                var person = _person.SelectPersonById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
+                person.FirstName = customer.name;
+                person.LastName = customer.last_name;
+                person.NationalCode = customer.national_code;
+                person.BirthDate = Convert.ToDateTime(customer.birthdate).ToShamsi();
+                person.Email = customer.email;
+                person.Sex = customer.sex;
+                await _person.Update(person);
+
+                var place = _place.SelectPlaceByPersonId(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
+                if (place != null)
+                {
+                    place.AddressLine = customer.address;
+                    place.TblCityId = cityId != null ? cityId.Id : 1;
+                    place.PostalCode = customer.postalCode;
+                    await _place.Update(place);
+                }
+                else
+                {
+                    TblPlace insertPlace = new()
+                    {
+                        TblPersonId = person.Id,
+                        TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
+                        TblPlaceTypeId = 1908,
+                        TblDistrictId = 3, //نامشخص
+                        PostalCode = customer.postalCode,
+                        AddressLine = customer.address,
+                        Settelment = "",
+                        Latitude = "0.0",
+                        Longitude = "0.0",
+                        Explanation = "From Online Shop",
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _place.Insert(insertPlace);
+                }
+
+                return new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code };
+            }
+            return new PersonViewModel.CustomerAddView() { user_id = 0, user_code = 0 };
         }
     }
 }

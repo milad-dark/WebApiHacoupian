@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 
@@ -27,6 +29,11 @@ namespace WebApiHacoupian.Services
         public async Task<TblInvoiceMaster> SelectInvoiceMasterById(long id)
         {
             return await _context.TblInvoiceMasters.FindAsync(id);
+        }
+
+        public async Task<TblInvoiceMaster> SelectLastNumberFactor(string date)
+        {
+            return await _context.TblInvoiceMasters.Where(i => i.InvoiceDate == date).OrderByDescending(p => p.Id).FirstAsync();
         }
     }
 }

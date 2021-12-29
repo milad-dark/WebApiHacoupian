@@ -87,5 +87,7 @@ namespace WebApiHacoupian.Interfaces
         Task<IEnumerable<TblPerson>> SelectPersonByNationalCode(string nationalCode);
 
         Task<bool> Insert(TblPerson person);
+        Task<bool> Update(TblPerson person);
+
     }
 }
