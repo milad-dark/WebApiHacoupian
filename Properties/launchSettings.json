@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -11,7 +12,6 @@
       "sslPort": 0
     }
   },
-  "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
@@ -20,8 +20,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "nativeDebugging": true,
-      "jsWebView2Debugging": false
+      "jsWebView2Debugging": false,
+      "nativeDebugging": true
     },
     "WebApiHacoupian": {
       "commandName": "Project",
@@ -30,8 +30,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
+      "applicationUrl": "https://localhost:5001;http://localhost:5000;http://192.168.15.34:80",
       "dotnetRunMessages": "true",
-      "applicationUrl": "https://localhost:5001;http://localhost:5000;http://192.168.15.34:80"
+      "nativeDebugging": false
     }
   }
 }

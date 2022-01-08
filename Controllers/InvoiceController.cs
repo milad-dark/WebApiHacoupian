@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
-using WebApiHacoupian.ViewModel;
 using WebApiHacoupian.Models;
+using WebApiHacoupian.ViewModel;
 
 namespace WebApiHacoupian.Controllers
 {
@@ -67,8 +67,8 @@ namespace WebApiHacoupian.Controllers
 
                 try
                 {
-                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(Convert.ToDateTime(onlineShop.date).ToShamsi());
-                    double totalTax = 0; 
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(Convert.ToDateTime(onlineShop.date).ToShamsi()).Result;
+                    double totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {
                         totalTax += item.price * 0.09;
@@ -90,7 +90,7 @@ namespace WebApiHacoupian.Controllers
                         InvoiceDate = Convert.ToDateTime(onlineShop.date).ToShamsi(),
                         InvoiceDateTime = Convert.ToDateTime(onlineShop.date),
                         InvoiceTime = Convert.ToDateTime(onlineShop.date).TimeOfDay,
-                        InvoiceNumber = lastInvoice.Result.InvoiceNumber + 1,
+                        InvoiceNumber = (lastInvoice != null) ? lastInvoice.InvoiceNumber + 1 : 1,
                         InvoiceTo = onlineShop.user_name,
                         ParentIdFromReturn = 0,
                         ParentId = 0,
@@ -115,7 +115,7 @@ namespace WebApiHacoupian.Controllers
                     //Insert Payment
                     InsertPayment(onlineShop.payment, id);
                     //Insert Stock Sheet and Item
-                    var stockId = InsertStockSheet(invoiceMaster);
+                    var stockId = InsertStockSheet(invoiceMaster).Result;
                     InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
                     return Ok($"InvoiceId: {id}");
@@ -203,7 +203,7 @@ namespace WebApiHacoupian.Controllers
             }
         }
         //Insert StockSheet
-        private long InsertStockSheet(TblInvoiceMaster invoiceMaster)
+        private async Task<long> InsertStockSheet(TblInvoiceMaster invoiceMaster)
         {
             string StoreCodeNew;
             switch (invoiceMaster.TblInvoiceRegistrarId.ToString())
@@ -318,34 +318,36 @@ namespace WebApiHacoupian.Controllers
                 IsSent = false,
                 IsDeleted = false,
             };
-            _finishedGoodStockSheet.Insert(stockSheet).ConfigureAwait(false);
+            await _finishedGoodStockSheet.Insert(stockSheet);
             return stockSheet.Id;
         }
-        private void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
+        private async void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
         {
             List<TblFinishedGoodStockSheetItem> lstStockItem = new List<TblFinishedGoodStockSheetItem>();
             foreach (var item in invoiceSlave)
             {
                 var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.PartCode).Result;
-
-                TblFinishedGoodStockSheetItem stockSheetItem = new()
+                if (finishedProduct != null)
                 {
-                    TblFinishedGoodStockSheetId = StockId,
-                    TblFinishedGoodProductId = finishedProduct.Id,
-                    TblOrderHeaderId = 19902,
-                    TblProductionOrderFinishedGoodProductsId = 24661,
-                    Count = item.PartCount,
-                    Price = item.SalePrice,
-                    ParentId = "",
-                    Explanation = "From Online Shop",
-                    Status = 0,
-                    Guid = Guid.NewGuid(),
-                    IsSent = false,
-                    IsDeleted = false
-                };
-                lstStockItem.Add(stockSheetItem);
+                    TblFinishedGoodStockSheetItem stockSheetItem = new()
+                    {
+                        TblFinishedGoodStockSheetId = StockId,
+                        TblFinishedGoodProductId = finishedProduct.Id,
+                        TblOrderHeaderId = 19902,
+                        TblProductionOrderFinishedGoodProductsId = 24661,
+                        Count = item.PartCount,
+                        Price = item.SalePrice,
+                        ParentId = "",
+                        Explanation = "From Online Shop",
+                        Status = 0,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    lstStockItem.Add(stockSheetItem);
+                }
             }
-            _finishedGoodStockSheetItem.Insert(lstStockItem).ConfigureAwait(false);
+            await _finishedGoodStockSheetItem.Insert(lstStockItem);
         }
     }
 }
