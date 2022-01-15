@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace WebApiHacoupian.Controllers
         private readonly IPlaceType _placeType;
         private readonly IProvince _province;
         private readonly IInvoiceMaster _invoiceMaster;
+        private readonly ILogger<CRMController> _logger;
         #endregion
 
         public CRMController(IPerson person,
@@ -36,7 +38,8 @@ namespace WebApiHacoupian.Controllers
             IPlaceType placeType,
             IPersonCertificate personCertificate,
             IProvince province,
-            IInvoiceMaster invoiceMaster)
+            IInvoiceMaster invoiceMaster,
+            ILogger<CRMController> logger)
         {
             _person = person;
             _certificate = certificate;
@@ -48,6 +51,7 @@ namespace WebApiHacoupian.Controllers
             _province = province;
             _personCertificate = personCertificate;
             _invoiceMaster = invoiceMaster;
+            _logger = logger;
         }
         /// <summary>
         /// Get Customer Details
@@ -136,13 +140,21 @@ namespace WebApiHacoupian.Controllers
                 //var isExistNational = await _person.SelectPersonByNationalCode(customer.national_code);
                 //var isExistName = await _person.SelectPersonByName(customer.name, customer.last_name);
 
-                var isExistPhone = await _phone.SelectByNumber(customer.mobile);
-                if (isExistPhone.Count() > 0)
+                try
                 {
-                   var updated = UpdateCustomer(customer).Result;
-                    return  updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : BadRequest("error in update");
+                    var isExistPhone = await _phone.SelectByNumber(customer.mobile);
+                    if (isExistPhone.Count() > 0)
+                    {
+                        var updated = UpdateCustomer(customer).Result;
+                        return updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : BadRequest("error in update");
+                    }
                 }
-
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Update person error: {ex.Message} - {ex.InnerException}");
+                    return BadRequest("error in update");
+                }
+                
                 var lastPerson = _person.SelectLastPerson();
                 var lastCode = lastPerson.Result.Code + 1;
                 try
@@ -219,6 +231,7 @@ namespace WebApiHacoupian.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError($"Insert Person error:  {ex.Message} - {ex.InnerException}");
                     return BadRequest(ex.Message);
                 }
             }
@@ -337,42 +350,66 @@ namespace WebApiHacoupian.Controllers
                 var cityId = await _city.SelectCityIdByCityName(customer.cityName);
 
                 var person = _person.SelectPersonById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
-                person.FirstName = customer.name;
-                person.LastName = customer.last_name;
-                person.NationalCode = customer.national_code;
-                person.BirthDate = Convert.ToDateTime(customer.birthdate).ToShamsi();
-                person.Email = customer.email;
-                person.Sex = customer.sex;
-                await _person.Update(person);
+                try
+                {
+                    person.FirstName = customer.name;
+                    person.LastName = customer.last_name;
+                    person.NationalCode = customer.national_code;
+                    person.BirthDate = Convert.ToDateTime(customer.birthdate).ToShamsi();
+                    person.Email = customer.email;
+                    person.Sex = customer.sex;
+                    await _person.Update(person);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Update person error: {ex.Message} - {ex.InnerException}");
+                }
+                
 
                 var place = _place.SelectPlaceByPersonId(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
                 if (place != null)
                 {
-                    place.AddressLine = customer.address;
-                    place.TblCityId = cityId != null ? cityId.Id : 1;
-                    place.PostalCode = customer.postalCode;
-                    await _place.Update(place);
+                    try
+                    {
+                        place.AddressLine = customer.address;
+                        place.TblCityId = cityId != null ? cityId.Id : 1;
+                        place.PostalCode = customer.postalCode;
+                        await _place.Update(place);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Update place error: {ex.Message} - {ex.InnerException}");
+                    }
+                    
                 }
                 else
                 {
-                    TblPlace insertPlace = new()
+                    try
                     {
-                        TblPersonId = person.Id,
-                        TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
-                        TblPlaceTypeId = 1908,
-                        TblDistrictId = 3, //نامشخص
-                        PostalCode = customer.postalCode,
-                        AddressLine = customer.address,
-                        Settelment = "",
-                        Latitude = "0.0",
-                        Longitude = "0.0",
-                        Explanation = "From Online Shop",
-                        Status = 1,
-                        Guid = Guid.NewGuid(),
-                        IsSent = false,
-                        IsDeleted = false
-                    };
-                    await _place.Insert(insertPlace);
+                        TblPlace insertPlace = new()
+                        {
+                            TblPersonId = person.Id,
+                            TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
+                            TblPlaceTypeId = 1908,
+                            TblDistrictId = 3, //نامشخص
+                            PostalCode = customer.postalCode,
+                            AddressLine = customer.address,
+                            Settelment = "",
+                            Latitude = "0.0",
+                            Longitude = "0.0",
+                            Explanation = "From Online Shop",
+                            Status = 1,
+                            Guid = Guid.NewGuid(),
+                            IsSent = false,
+                            IsDeleted = false
+                        };
+                        await _place.Insert(insertPlace);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
+                    }
+                    
                 }
 
                 return new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code };

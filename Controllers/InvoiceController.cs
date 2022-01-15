@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace WebApiHacoupian.Controllers
         private readonly IFinishedGoodStockSheet _finishedGoodStockSheet;
         private readonly IFinishedGoodStockSheetItem _finishedGoodStockSheetItem;
         private readonly IFinishedGoodProduct _finishedGoodProduct;
-
+        private readonly ILogger<InvoiceController> _logger;
         #endregion
         public InvoiceController(
             IPerson person,
@@ -36,7 +37,8 @@ namespace WebApiHacoupian.Controllers
             IRegistrarType registrarType,
             IFinishedGoodStockSheet finishedGoodStockSheet,
             IFinishedGoodStockSheetItem finishedGoodStockSheetItem,
-            IFinishedGoodProduct finishedGoodProduct)
+            IFinishedGoodProduct finishedGoodProduct,
+            ILogger<InvoiceController> logger)
         {
             _person = person;
             _invoiceMaster = invoiceMaster;
@@ -48,6 +50,7 @@ namespace WebApiHacoupian.Controllers
             _finishedGoodStockSheet = finishedGoodStockSheet;
             _finishedGoodStockSheetItem = finishedGoodStockSheetItem;
             _finishedGoodProduct = finishedGoodProduct;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -122,6 +125,7 @@ namespace WebApiHacoupian.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError($"Insert Invoice error: {ex.Message} - {ex.InnerException}");
                     BadRequest(ex.Message);
                 }
             }
@@ -130,76 +134,97 @@ namespace WebApiHacoupian.Controllers
         //Insert Order Items To TblInvoiceSlave
         private void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
         {
-            if (invoiceSlave.Count > 0)
+            try
             {
-                int indexItem = 1;
-                foreach (var item in invoiceSlave)
+                if (invoiceSlave.Count > 0)
                 {
-                    TblInvoiceSlave slave = new()
+                    int indexItem = 1;
+                    foreach (var item in invoiceSlave)
                     {
-                        TblInvoiceMasterId = invoiceMasterId,
-                        PartCode = item.barcode,
-                        PartCount = item.count,
-                        ItemIndex = indexItem,
-                        SalePrice = (long)item.price,
-                        PartTax = (long)(item.price * 0.09),
-                        PartDiscount = 0,
-                        Explanation = "From Online Shop",
-                        IsGift = false,
-                        Status = 1,
-                        Guid = Guid.NewGuid(),
-                        IsDeleted = false,
-                        IsSent = false
-                    };
-                    _invoiceSlave.Insert(slave);
-                    indexItem++;
+                        TblInvoiceSlave slave = new()
+                        {
+                            TblInvoiceMasterId = invoiceMasterId,
+                            PartCode = item.barcode,
+                            PartCount = item.count,
+                            ItemIndex = indexItem,
+                            SalePrice = (long)item.price,
+                            PartTax = (long)(item.price * 0.09),
+                            PartDiscount = 0,
+                            Explanation = "From Online Shop",
+                            IsGift = false,
+                            Status = 1,
+                            Guid = Guid.NewGuid(),
+                            IsDeleted = false,
+                            IsSent = false
+                        };
+                        _invoiceSlave.Insert(slave);
+                        indexItem++;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Insert slave error: {ex.Message} - {ex.InnerException}");
+            }
+            
         }
         //Insert Payment Order To TblInvoiceMasterPayment
         private void InsertPayment(double amount, long invoiceMasterId)
         {
-            if (amount > 0)
+            try
             {
-                TblInvoiceMasterPayment payment = new()
+                if (amount > 0)
                 {
-                    TblInvoiceMasterId = invoiceMasterId,
-                    Amount = (long)amount,
-                    TblPaymentTypeId = 1,
-                    Explanation = "From Online Shop",
-                    Status = 1,
-                    Guid = Guid.NewGuid(),
-                    IsDeleted = false,
-                    IsSent = false
-                };
-                _invoiceMasterPayment.Insert(payment).ConfigureAwait(false);
-            }
-
-        }
-        //Insert Discounts Order To TblInvoiceMasterDiscount
-        private void InsertDiscounts(List<Discounts> discounts, long invoiceMasterId)
-        {
-            if (discounts.Count > 0)
-            {
-                List<TblInvoiceMasterDiscount> lstDiscount = new List<TblInvoiceMasterDiscount>();
-                foreach (var item in discounts)
-                {
-                    TblInvoiceMasterDiscount discount = new()
+                    TblInvoiceMasterPayment payment = new()
                     {
                         TblInvoiceMasterId = invoiceMasterId,
-                        TblDiscountTypeId = item.type,
-                        Amount = (long)item.price,
-                        CardNumber = ";0;",
-                        DiscountPercent = "0",
+                        Amount = (long)amount,
+                        TblPaymentTypeId = 1,
                         Explanation = "From Online Shop",
                         Status = 1,
                         Guid = Guid.NewGuid(),
                         IsDeleted = false,
                         IsSent = false
                     };
-                    lstDiscount.Add(discount);
+                    _invoiceMasterPayment.Insert(payment).ConfigureAwait(false);
                 }
-                _invoiceMasterDiscount.Insert(lstDiscount).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Insert payment error: {ex.Message} - {ex.InnerException}");
+            }
+        }
+        //Insert Discounts Order To TblInvoiceMasterDiscount
+        private void InsertDiscounts(List<Discounts> discounts, long invoiceMasterId)
+        {
+            try
+            {
+                if (discounts.Count > 0)
+                {
+                    List<TblInvoiceMasterDiscount> lstDiscount = new List<TblInvoiceMasterDiscount>();
+                    foreach (var item in discounts)
+                    {
+                        TblInvoiceMasterDiscount discount = new()
+                        {
+                            TblInvoiceMasterId = invoiceMasterId,
+                            TblDiscountTypeId = item.type,
+                            Amount = (long)item.price,
+                            CardNumber = ";0;",
+                            DiscountPercent = "0",
+                            Explanation = "From Online Shop",
+                            Status = 1,
+                            Guid = Guid.NewGuid(),
+                            IsDeleted = false,
+                            IsSent = false
+                        };
+                        lstDiscount.Add(discount);
+                    }
+                    _invoiceMasterDiscount.Insert(lstDiscount).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Insert discount error: {ex.Message} - {ex.InnerException}");
             }
         }
         //Insert StockSheet
@@ -298,56 +323,71 @@ namespace WebApiHacoupian.Controllers
                     break;
             }
 
-            TblFinishedGoodStockSheet stockSheet = new()
+            try
             {
-                TblCompanyIdAsOwner = 2,
-                TblCompanyIdAsReceiver = 12336,
-                TblCompanyIdAsIssuer = null,
-                TblPlaceTypeIdAsReceiver = null,
-                TblPlaceTypeIdAsIssuer = Convert.ToInt64(StoreCodeNew),
-                TblPersonIdAsIssuer = null,
-                TblPersonIdAsReceiver = null,
-                TblFinishedGoodStockSheetTypeId = 5,
-                TblFinishedGoodStockSheetSubTypeId = 5,
-                SheetIndex = 1,
-                SheetNumber = invoiceMaster.InvoiceNumber,
-                Date = invoiceMaster.InvoiceDate,
-                Explanation = "From Online Shop",
-                Status = 0,
-                Guid = Guid.NewGuid(),
-                IsSent = false,
-                IsDeleted = false,
-            };
-            await _finishedGoodStockSheet.Insert(stockSheet);
-            return stockSheet.Id;
+                TblFinishedGoodStockSheet stockSheet = new()
+                {
+                    TblCompanyIdAsOwner = 2,
+                    TblCompanyIdAsReceiver = 12336,
+                    TblCompanyIdAsIssuer = null,
+                    TblPlaceTypeIdAsReceiver = null,
+                    TblPlaceTypeIdAsIssuer = Convert.ToInt64(StoreCodeNew),
+                    TblPersonIdAsIssuer = null,
+                    TblPersonIdAsReceiver = null,
+                    TblFinishedGoodStockSheetTypeId = 5,
+                    TblFinishedGoodStockSheetSubTypeId = 5,
+                    SheetIndex = 1,
+                    SheetNumber = invoiceMaster.InvoiceNumber,
+                    Date = invoiceMaster.InvoiceDate,
+                    Explanation = "From Online Shop",
+                    Status = 0,
+                    Guid = Guid.NewGuid(),
+                    IsSent = false,
+                    IsDeleted = false,
+                };
+                await _finishedGoodStockSheet.Insert(stockSheet);
+                return stockSheet.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Insert StockSheet error: {ex.Message} - {ex.InnerException}");
+                return 0;
+            }
         }
         private async void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
         {
-            List<TblFinishedGoodStockSheetItem> lstStockItem = new List<TblFinishedGoodStockSheetItem>();
-            foreach (var item in invoiceSlave)
+            try
             {
-                var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.PartCode).Result;
-                if (finishedProduct != null)
+                List<TblFinishedGoodStockSheetItem> lstStockItem = new List<TblFinishedGoodStockSheetItem>();
+                foreach (var item in invoiceSlave)
                 {
-                    TblFinishedGoodStockSheetItem stockSheetItem = new()
+                    var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.PartCode).Result;
+                    if (finishedProduct != null)
                     {
-                        TblFinishedGoodStockSheetId = StockId,
-                        TblFinishedGoodProductId = finishedProduct.Id,
-                        TblOrderHeaderId = 19902,
-                        TblProductionOrderFinishedGoodProductsId = 24661,
-                        Count = item.PartCount,
-                        Price = item.SalePrice,
-                        ParentId = "",
-                        Explanation = "From Online Shop",
-                        Status = 0,
-                        Guid = Guid.NewGuid(),
-                        IsSent = false,
-                        IsDeleted = false
-                    };
-                    lstStockItem.Add(stockSheetItem);
+                        TblFinishedGoodStockSheetItem stockSheetItem = new()
+                        {
+                            TblFinishedGoodStockSheetId = StockId,
+                            TblFinishedGoodProductId = finishedProduct.Id,
+                            TblOrderHeaderId = 19902,
+                            TblProductionOrderFinishedGoodProductsId = 24661,
+                            Count = item.PartCount,
+                            Price = item.SalePrice,
+                            ParentId = "",
+                            Explanation = "From Online Shop",
+                            Status = 0,
+                            Guid = Guid.NewGuid(),
+                            IsSent = false,
+                            IsDeleted = false
+                        };
+                        lstStockItem.Add(stockSheetItem);
+                    }
                 }
+                await _finishedGoodStockSheetItem.Insert(lstStockItem);
             }
-            await _finishedGoodStockSheetItem.Insert(lstStockItem);
+            catch (Exception ex)
+            {
+                _logger.LogError($"Insert StockSheetItem error: {ex.Message} - {ex.InnerException}");
+            }
         }
     }
 }
