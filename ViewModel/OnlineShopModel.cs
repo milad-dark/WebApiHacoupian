@@ -37,4 +37,10 @@ namespace WebApiHacoupian.ViewModel
         public int count { get; set; }
         public double price { get; set; }
     }
+
+    public class Invoice
+    {
+        public long InvoiceId { get; set; }
+
+    }
 }

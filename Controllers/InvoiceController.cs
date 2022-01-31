@@ -60,16 +60,23 @@ namespace WebApiHacoupian.Controllers
             if (ModelState.IsValid)
             {
                 if (onlineShop.order_items.Count == 0)
-                    BadRequest("فاکتور بدون آیتم میباشد");
+                    return BadRequest("فاکتور بدون آیتم میباشد");
                 if (string.IsNullOrEmpty(onlineShop.user_name) || string.IsNullOrEmpty(onlineShop.user_code))
-                    BadRequest("تام مشترک یا کد مشترک خالی/صفر میباشد");
+                    return BadRequest("تام مشترک یا کد مشترک خالی/صفر میباشد");
                 if (onlineShop.invoice_number == 0)
-                    BadRequest("فاکتور فاقد شماره میباشد");
+                    return BadRequest("فاکتور فاقد شماره میباشد");
                 if (onlineShop.payment == 0)
-                    BadRequest("فاکتور فاقد پرداختی میباشد");
+                    return BadRequest("فاکتور فاقد پرداختی میباشد");
 
                 try
                 {
+                    //Check Product list existed in DB
+                    foreach (var item in onlineShop.order_items)
+                    {
+                        var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.barcode).Result;
+                        if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.barcode));
+                    }
+
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactor(Convert.ToDateTime(onlineShop.date).ToShamsi()).Result;
                     double totalTax = 0;
                     foreach (var item in onlineShop.order_items)
@@ -121,7 +128,9 @@ namespace WebApiHacoupian.Controllers
                     var stockId = InsertStockSheet(invoiceMaster).Result;
                     InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
-                    return Ok($"InvoiceId: {id}");
+                    var invoiceId = new Invoice { InvoiceId = id };
+                    //return Ok($"InvoiceId: {id}");
+                    return Ok(invoiceId);
                 }
                 catch (Exception ex)
                 {
