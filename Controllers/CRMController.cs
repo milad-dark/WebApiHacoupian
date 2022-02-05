@@ -416,5 +416,43 @@ namespace WebApiHacoupian.Controllers
             }
             return new PersonViewModel.CustomerAddView() { user_id = 0, user_code = 0 };
         }
+
+        //Insert Other Address
+        public async Task<ActionResult> InsertAddress([FromBody] PersonViewModel.CustomerAddAddress addressModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var cityId = _city.SelectCityIdByCityName(addressModel.cityName).Result;
+                try 
+	            {	        
+		            TblPlace place = new()
+                    {
+                        TblPersonId = addressModel.user_id,
+                        TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
+                        TblPlaceTypeId = 1908,
+                        TblDistrictId = 3, //نامشخص
+                        PostalCode = addressModel.postalCode,
+                        AddressLine = addressModel.address,
+                        Settelment = "",
+                        Latitude = "0.0",
+                        Longitude = "0.0",
+                        Explanation = "From Online Shop",
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _place.Insert(place);
+                    return Ok(place.Id);
+	            }
+	            catch (Exception ex)
+                {
+                    _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
+                    return BadRequest($"Insert place error: {ex.Message} - {ex.InnerException}");
+                }
+               
+            }
+            return BadRequest("داده های ارسالی اشتباه است");
+        }
     }
 }
