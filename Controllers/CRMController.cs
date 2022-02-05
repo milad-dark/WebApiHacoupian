@@ -154,7 +154,7 @@ namespace WebApiHacoupian.Controllers
                     _logger.LogError($"Update person error: {ex.Message} - {ex.InnerException}");
                     return BadRequest("error in update");
                 }
-                
+
                 var lastPerson = _person.SelectLastPerson();
                 var lastCode = lastPerson.Result.Code + 1;
                 try
@@ -364,7 +364,7 @@ namespace WebApiHacoupian.Controllers
                 {
                     _logger.LogError($"Update person error: {ex.Message} - {ex.InnerException}");
                 }
-                
+
 
                 var place = _place.SelectPlaceByPersonId(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
                 if (place != null)
@@ -380,7 +380,7 @@ namespace WebApiHacoupian.Controllers
                     {
                         _logger.LogError($"Update place error: {ex.Message} - {ex.InnerException}");
                     }
-                    
+
                 }
                 else
                 {
@@ -409,7 +409,7 @@ namespace WebApiHacoupian.Controllers
                     {
                         _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
                     }
-                    
+
                 }
 
                 return new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code };
@@ -423,9 +423,9 @@ namespace WebApiHacoupian.Controllers
             if (ModelState.IsValid)
             {
                 var cityId = _city.SelectCityIdByCityName(addressModel.cityName).Result;
-                try 
-	            {	        
-		            TblPlace place = new()
+                try
+                {
+                    TblPlace place = new()
                     {
                         TblPersonId = addressModel.user_id,
                         TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
@@ -444,13 +444,12 @@ namespace WebApiHacoupian.Controllers
                     };
                     await _place.Insert(place);
                     return Ok(place.Id);
-	            }
-	            catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
                     return BadRequest($"Insert place error: {ex.Message} - {ex.InnerException}");
                 }
-               
             }
             return BadRequest("داده های ارسالی اشتباه است");
         }
