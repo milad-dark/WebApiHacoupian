@@ -77,7 +77,8 @@ namespace WebApiHacoupian.Controllers
                         if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.barcode));
                     }
 
-                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(Convert.ToDateTime(onlineShop.date).ToShamsi()).Result;
+                    var dateInvoice = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(onlineShop.date);
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(dateInvoice.ToShamsi()).Result;
                     double totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {
@@ -97,9 +98,9 @@ namespace WebApiHacoupian.Controllers
                         TblInvoiceRegistrarId = 34,//فروشگاه آنلاین
                         TblInvoiceStatusId = 1,
                         TblPersonId = 523841,
-                        InvoiceDate = Convert.ToDateTime(onlineShop.date).ToShamsi(),
-                        InvoiceDateTime = Convert.ToDateTime(onlineShop.date),
-                        InvoiceTime = Convert.ToDateTime(onlineShop.date).TimeOfDay,
+                        InvoiceDate = dateInvoice.ToShamsi(),
+                        InvoiceDateTime = dateInvoice,
+                        InvoiceTime = dateInvoice.TimeOfDay,
                         InvoiceNumber = (lastInvoice != null) ? lastInvoice.InvoiceNumber + 1 : 1,
                         InvoiceTo = onlineShop.user_name,
                         ParentIdFromReturn = 0,

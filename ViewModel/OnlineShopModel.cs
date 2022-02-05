@@ -11,8 +11,8 @@ namespace WebApiHacoupian.ViewModel
         public string user_code { get; set; }
         //Customer Name
         public string user_name { get; set; }
-        //Created DateTime
-        public string date { get; set; }
+        //Created DateTime (epouch or timestamp)
+        public double date { get; set; }
         //Invoice Number '223'
         public long invoice_number { get; set; }
         //Invoice Price Payment '105840000 R'
