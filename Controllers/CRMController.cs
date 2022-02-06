@@ -454,7 +454,7 @@ namespace WebApiHacoupian.Controllers
             return BadRequest("داده های ارسالی اشتباه است");
         }
 
-        public async Task<IActionResult> InsertPhone([FromBody] PersonViewModel.CustomerAddPhone phoneModel)
+        public async Task<ActionResult> InsertPhone([FromBody] PersonViewModel.CustomerAddPhone phoneModel)
         {
             if (ModelState.IsValid)
             {

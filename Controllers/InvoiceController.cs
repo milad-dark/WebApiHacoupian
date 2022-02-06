@@ -77,7 +77,7 @@ namespace WebApiHacoupian.Controllers
                         if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.barcode));
                     }
 
-                    var dateInvoice = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(onlineShop.date);
+                    var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactor(dateInvoice.ToShamsi()).Result;
                     double totalTax = 0;
                     foreach (var item in onlineShop.order_items)
