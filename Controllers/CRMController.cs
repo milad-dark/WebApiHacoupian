@@ -166,7 +166,7 @@ namespace WebApiHacoupian.Controllers
                         FatherName = "FatherName",
                         Password = "",
                         NationalCode = customer.national_code,
-                        BirthDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(customer.birthdate).ToShamsi(),
+                        BirthDate = EpouchConvertor.EpouchToDateTime(customer.birthdate).ToShamsi(),
                         Sex = customer.sex,
                         TblPersonTypeId = 100,
                         TblCountryIdAsNationality = 1,
@@ -450,6 +450,38 @@ namespace WebApiHacoupian.Controllers
                     _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
                     return BadRequest($"Insert place error: {ex.Message} - {ex.InnerException}");
                 }
+            }
+            return BadRequest("داده های ارسالی اشتباه است");
+        }
+
+        public async Task<IActionResult> InsertPhone([FromBody] PersonViewModel.CustomerAddPhone phoneModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var isExistPhone = await _phone.SelectByNumber(phoneModel.mobile);
+                if (isExistPhone.Count() > 0)
+                    return BadRequest("Phone Existed!!!");
+                try
+                {
+                    var person = await _person.SelectPersonById(phoneModel.user_id);
+                    TblPhone phone = new()
+                    {
+                        TblPersonId = phoneModel.user_id,
+                        TblPhoneTypeId = 32,
+                        Number = phoneModel.mobile,
+                        Explanation = person.FirstOrDefault().FirstName + " " + person.FirstOrDefault().LastName,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    await _phone.Insert(phone);
+                    return Ok(phone.Id);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
+                    return BadRequest($"Insert place error: {ex.Message} - {ex.InnerException}");
+                } 
             }
             return BadRequest("داده های ارسالی اشتباه است");
         }

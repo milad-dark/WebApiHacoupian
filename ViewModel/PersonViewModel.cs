@@ -57,6 +57,12 @@ namespace WebApiHacoupian.ViewModel
             public string address { get; set; }
         }
 
+        public class CustomerAddPhone
+        {
+            public long user_id { get; set; }
+            public string mobile { get; set; }
+        }
+
         public class CustomerAddView
         {
             public long user_id { get; set; }
