@@ -82,15 +82,15 @@ namespace WebApiHacoupian.Controllers
                     double totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {
-                        totalTax += item.price * 0.09;
+                        totalTax += (item.price / 1.09) * 0.09;
                     }
                     var invoiceMaster = new TblInvoiceMaster
                     {
                         TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
                         TblCompanyIdAsReceiver = onlineShop.orgin,
                         TblCompanyIdAsIssuer = onlineShop.orgin,
-                        TblPlaceTypeIdAsIssuer = 2947,//فروشگاه آنلاین (2948)
-                        TblPlaceTypeIdAsReceiver = 2947,//فروشگاه آنلاین (2948)
+                        TblPlaceTypeIdAsIssuer = 2948,//فروشگاه آنلاین (2948)
+                        TblPlaceTypeIdAsReceiver = 2948,//فروشگاه آنلاین (2948)
                         TblPersonIdAsIssuer = 523841,//زاهدی
                         TblPersonIdAsReceiver = 523841,//زاهدی
                         TblInitializedTypeId = 3,//فاکتور
@@ -157,8 +157,8 @@ namespace WebApiHacoupian.Controllers
                             PartCode = item.barcode,
                             PartCount = item.count,
                             ItemIndex = indexItem,
-                            SalePrice = (long)item.price,
-                            PartTax = (long)(item.price * 0.09),
+                            SalePrice = (long)(item.price / 1.09),
+                            PartTax = (long)((item.price / 1.09) * 0.09),
                             PartDiscount = 0,
                             Explanation = "From Online Shop",
                             IsGift = false,
@@ -326,7 +326,7 @@ namespace WebApiHacoupian.Controllers
                     StoreCodeNew = "2640";
                     break;
                 case "34":
-                    StoreCodeNew = "2947";//2948 در دیتابیس اصلی
+                    StoreCodeNew = "2948";//2948 در دیتابیس اصلی
                     break;
                 default:
                     StoreCodeNew = "1935";
