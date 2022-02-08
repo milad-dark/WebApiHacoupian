@@ -137,8 +137,13 @@ namespace WebApiHacoupian.Controllers
         {
             if (ModelState.IsValid)
             {
-                //var isExistNational = await _person.SelectPersonByNationalCode(customer.national_code);
-                //var isExistName = await _person.SelectPersonByName(customer.name, customer.last_name);
+                _logger.LogInformation("Data Customer: ", customer);
+
+                var isExistName = await _person.SelectPersonByName(customer.name, customer.last_name);
+                if (isExistName.Count() > 0)
+                {
+                    return Ok(new PersonViewModel.CustomerAddView() { user_id = isExistName.FirstOrDefault().Id, user_code = isExistName.FirstOrDefault().Code });
+                }
 
                 try
                 {

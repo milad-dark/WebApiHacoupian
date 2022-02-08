@@ -59,6 +59,8 @@ namespace WebApiHacoupian.Controllers
             //1935 placeType and person 523841 zahedi and registrar 34
             if (ModelState.IsValid)
             {
+                _logger.LogInformation("Data Invoice: ", onlineShop);
+
                 if (onlineShop.order_items.Count == 0)
                     return BadRequest("فاکتور بدون آیتم میباشد");
                 if (string.IsNullOrEmpty(onlineShop.user_name) || string.IsNullOrEmpty(onlineShop.user_code))
