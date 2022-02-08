@@ -79,10 +79,10 @@ namespace WebApiHacoupian.Controllers
 
                     var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactor(dateInvoice.ToShamsi()).Result;
-                    double totalTax = 0;
+                    Int32 totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {
-                        totalTax += (item.price / 1.09) * 0.09;
+                        totalTax += (Int32)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero);
                     }
                     var invoiceMaster = new TblInvoiceMaster
                     {
@@ -158,7 +158,7 @@ namespace WebApiHacoupian.Controllers
                             PartCount = item.count,
                             ItemIndex = indexItem,
                             SalePrice = (long)(item.price / 1.09),
-                            PartTax = (long)((item.price / 1.09) * 0.09),
+                            PartTax = (long)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero),
                             PartDiscount = 0,
                             Explanation = "From Online Shop",
                             IsGift = false,
@@ -176,7 +176,7 @@ namespace WebApiHacoupian.Controllers
             {
                 _logger.LogError($"Insert slave error: {ex.Message} - {ex.InnerException}");
             }
-            
+
         }
         //Insert Payment Order To TblInvoiceMasterPayment
         private void InsertPayment(double amount, long invoiceMasterId)
