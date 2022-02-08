@@ -359,8 +359,8 @@ namespace WebApiHacoupian.Controllers
                 {
                     person.FirstName = customer.name;
                     person.LastName = customer.last_name;
-                    person.NationalCode = customer.national_code;
-                    person.BirthDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(customer.birthdate).ToShamsi();
+                    //person.NationalCode = customer.national_code;
+                    //person.BirthDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(customer.birthdate).ToShamsi();
                     person.Email = customer.email;
                     person.Sex = customer.sex;
                     await _person.Update(person);
