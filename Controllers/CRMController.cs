@@ -139,11 +139,11 @@ namespace WebApiHacoupian.Controllers
             {
                 _logger.LogInformation("Data Customer: ", customer);
 
-                var isExistName = await _person.SelectPersonByName(customer.name, customer.last_name);
-                if (isExistName.Count() > 0)
-                {
-                    return Ok(new PersonViewModel.CustomerAddView() { user_id = isExistName.FirstOrDefault().Id, user_code = isExistName.FirstOrDefault().Code });
-                }
+                //var isExistName = await _person.SelectPersonByName(customer.name, customer.last_name);
+                //if (isExistName.Count() > 0)
+                //{
+                //    return Ok(new PersonViewModel.CustomerAddView() { user_id = isExistName.FirstOrDefault().Id, user_code = isExistName.FirstOrDefault().Code });
+                //}
 
                 try
                 {
