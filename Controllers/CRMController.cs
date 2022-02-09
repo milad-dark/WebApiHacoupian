@@ -147,8 +147,8 @@ namespace WebApiHacoupian.Controllers
 
                 try
                 {
-                    var isExistPhone = await _phone.SelectByNumber(customer.mobile);
-                    if (isExistPhone.Count() > 0)
+                    var isExistPhone = await _phone.SelectByMobile(customer.mobile);
+                    if (isExistPhone != null)
                     {
                         var updated = UpdateCustomer(customer).Result;
                         return updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : BadRequest("error in update");
@@ -237,7 +237,7 @@ namespace WebApiHacoupian.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError($"Insert Person error:  {ex.Message} - {ex.InnerException}");
-                    return BadRequest(ex.Message);
+                    return BadRequest(ex.Message + " - " + ex.InnerException);
                 }
             }
             return BadRequest("اطلاعات ارسالی اشتباه است");

@@ -46,5 +46,10 @@ namespace WebApiHacoupian.Services
             }
             return false;
         }
+
+        public async Task<TblPhone> SelectByMobile(string phone)
+        {
+            return await _context.TblPhones.FirstOrDefaultAsync(p => p.Number == phone && p.TblPhoneTypeId == 32);
+        }
     }
 }
