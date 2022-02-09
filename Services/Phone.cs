@@ -17,12 +17,12 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblPhone>> SelectPhoneByPersonId(long personId)
         {
-            return await _context.TblPhones.Where(p => p.TblPersonId == personId).ToListAsync();
+            return await _context.TblPhones.Where(p => p.TblPersonId == personId && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPhone>> SelectByNumber(string phone)
         {
-            return await _context.TblPhones.Where(p => p.Number == phone).ToListAsync();
+            return await _context.TblPhones.Where(p => p.Number == phone && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<bool> Insert(TblPhone phone)
@@ -49,7 +49,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<TblPhone> SelectByMobile(string phone)
         {
-            return await _context.TblPhones.FirstOrDefaultAsync(p => p.Number == phone && p.TblPhoneTypeId == 32);
+            return await _context.TblPhones.FirstOrDefaultAsync(p => p.Number == phone && p.TblPhoneTypeId == 32 && p.IsDeleted == false);
         }
     }
 }

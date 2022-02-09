@@ -18,7 +18,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblInvoiceSlave>> GetInvoiceSlaves(long invoiceMasterId)
         {
-            return await _context.TblInvoiceSlaves.Where(c => c.TblInvoiceMasterId == invoiceMasterId).ToListAsync();
+            return await _context.TblInvoiceSlaves.Where(c => c.TblInvoiceMasterId == invoiceMasterId && c.IsDeleted == false).ToListAsync();
         }
 
         public async Task<bool> Insert(TblInvoiceSlave invoiceSlave)

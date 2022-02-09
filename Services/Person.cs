@@ -51,27 +51,27 @@ namespace WebApiHacoupian.Services
 
         public async Task<TblPerson> SelectPersonByCode(long code)
         {
-            return await _context.TblPeople.FirstOrDefaultAsync(p => p.Code == code);
+            return await _context.TblPeople.FirstOrDefaultAsync(p => p.Code == code && p.IsDeleted == false);
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonByName(string firstName, string lastName)
         {
-            return await _context.TblPeople.Where(p => p.FirstName.Contains(firstName) && p.LastName.Contains(lastName)).ToListAsync();
+            return await _context.TblPeople.Where(p => p.FirstName.Contains(firstName) && p.LastName.Contains(lastName) && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonById(long id)
         {
-            return await _context.TblPeople.Where(p => p.Id == id).ToListAsync();
+            return await _context.TblPeople.Where(p => p.Id == id && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonByNationalCode(string nationalCode)
         {
-            return await _context.TblPeople.Where(p => p.NationalCode == nationalCode).ToListAsync();
+            return await _context.TblPeople.Where(p => p.NationalCode == nationalCode && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonByCodeList(long code)
         {
-            return await _context.TblPeople.Where(p => p.Code == code).ToListAsync();
+            return await _context.TblPeople.Where(p => p.Code == code && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<bool> Insert(TblPerson person)

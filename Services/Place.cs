@@ -28,7 +28,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblPlace>> SelectPlaceByPersonId(long personId)
         {
-            return await _context.TblPlaces.Where(p => p.TblPersonId == personId).ToListAsync();
+            return await _context.TblPlaces.Where(p => p.TblPersonId == personId && p.IsDeleted == false).ToListAsync();
         }
 
         public async Task<bool> Update(TblPlace place)
