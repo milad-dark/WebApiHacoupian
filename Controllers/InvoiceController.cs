@@ -80,7 +80,7 @@ namespace WebApiHacoupian.Controllers
                     }
 
                     var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
-                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(dateInvoice.ToShamsi()).Result;
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948).Result;//فروشگاه آنلاین (2948) - last Number
                     Int32 totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {

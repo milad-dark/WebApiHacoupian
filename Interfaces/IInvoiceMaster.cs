@@ -9,6 +9,6 @@ namespace WebApiHacoupian.Interfaces
 
         Task<bool> Insert(TblInvoiceMaster invoiceMaster);
 
-        Task<TblInvoiceMaster> SelectLastNumberFactor(string date);
+        Task<TblInvoiceMaster> SelectLastNumberFactor(long placeType);
     }
 }

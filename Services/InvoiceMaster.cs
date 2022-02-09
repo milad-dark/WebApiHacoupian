@@ -31,9 +31,9 @@ namespace WebApiHacoupian.Services
             return await _context.TblInvoiceMasters.FindAsync(id);
         }
 
-        public async Task<TblInvoiceMaster> SelectLastNumberFactor(string date)
+        public async Task<TblInvoiceMaster> SelectLastNumberFactor(long placeType)
         {
-            return await _context.TblInvoiceMasters.Where(i => i.InvoiceDate == date && i.IsDeleted == false).OrderByDescending(p => p.Id).FirstOrDefaultAsync();
+            return await _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false).OrderByDescending(p => p.Id).FirstOrDefaultAsync();
         }
     }
 }
