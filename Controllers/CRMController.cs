@@ -212,25 +212,28 @@ namespace WebApiHacoupian.Controllers
                     };
                     await _phone.Insert(phone);
 
-                    var cityId = _city.SelectCityIdByCityName(customer.cityName).Result;
-                    TblPlace place = new()
+                    if (!string.IsNullOrEmpty(customer.cityName))
                     {
-                        TblPersonId = person.Id,
-                        TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
-                        TblPlaceTypeId = 1908,
-                        TblDistrictId = 3, //نامشخص
-                        PostalCode = customer.postalCode,
-                        AddressLine = customer.address,
-                        Settelment = "",
-                        Latitude = "0.0",
-                        Longitude = "0.0",
-                        Explanation = "From Online Shop",
-                        Status = 1,
-                        Guid = Guid.NewGuid(),
-                        IsSent = false,
-                        IsDeleted = false
-                    };
-                    await _place.Insert(place);
+                        var cityId = _city.SelectCityIdByCityName(customer.cityName).Result;
+                        TblPlace place = new()
+                        {
+                            TblPersonId = person.Id,
+                            TblCityId = cityId != null ? cityId.Id : 1, //1 نامشخص
+                            TblPlaceTypeId = 1908,
+                            TblDistrictId = 3, //نامشخص
+                            PostalCode = customer.postalCode,
+                            AddressLine = customer.address,
+                            Settelment = "",
+                            Latitude = "0.0",
+                            Longitude = "0.0",
+                            Explanation = "From Online Shop",
+                            Status = 1,
+                            Guid = Guid.NewGuid(),
+                            IsSent = false,
+                            IsDeleted = false
+                        };
+                        await _place.Insert(place);
+                    }
 
                     return Ok(new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code });
                 }
