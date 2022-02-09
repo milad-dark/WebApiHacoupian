@@ -15,7 +15,7 @@ namespace WebApiHacoupian.Extention
                 error.Run(async context =>
                 {
                     var _logger = loggerFactury.CreateLogger("exceptionHandlerMidlleware");
-                    context.Response.StatusCode = 500;
+                    context.Response.StatusCode = 400;//500
                     context.Response.ContentType = "application/json";
 
                     var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
@@ -30,6 +30,7 @@ namespace WebApiHacoupian.Extention
                         await context.Response.WriteAsync(_error);
                     }
                 });
+                
             });
         }
     }

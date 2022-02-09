@@ -18,7 +18,7 @@ namespace WebApiHacoupian
                     webBuilder.UseStartup<Startup>();
                 }).ConfigureLogging(builder =>
                 {
-                    builder.SetMinimumLevel(LogLevel.Information);
+                    builder.SetMinimumLevel(LogLevel.Error);
                     builder.AddLog4Net("log4net.config");
                 });
     }
