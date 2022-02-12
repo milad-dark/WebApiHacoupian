@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 
@@ -13,15 +12,15 @@ namespace WebApiHacoupian.Services
         {
             _context = context;
         }
-        public async Task<bool> Insert(List<TblInvoiceMasterDiscount> invoiceMasterDiscount)
+        public bool Insert(List<TblInvoiceMasterDiscount> invoiceMasterDiscount)
         {
             if (invoiceMasterDiscount != null)
             {
                 foreach (var item in invoiceMasterDiscount)
                 {
-                    await _context.TblInvoiceMasterDiscounts.AddAsync(item);
+                    _context.TblInvoiceMasterDiscounts.Add(item);
                 }
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return true;
             }
             return false;

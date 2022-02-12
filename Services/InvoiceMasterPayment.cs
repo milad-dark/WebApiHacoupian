@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using WebApiHacoupian.Interfaces;
+﻿using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Services
@@ -12,12 +11,12 @@ namespace WebApiHacoupian.Services
         {
             _context = context;
         }
-        public async Task<bool> Insert(TblInvoiceMasterPayment invoiceMasterPayment)
+        public bool Insert(TblInvoiceMasterPayment invoiceMasterPayment)
         {
             if (invoiceMasterPayment != null)
             {
-                await _context.TblInvoiceMasterPayments.AddAsync(invoiceMasterPayment);
-                await _context.SaveChangesAsync();
+                _context.TblInvoiceMasterPayments.Add(invoiceMasterPayment);
+                _context.SaveChanges();
                 return true;
             }
             return false;

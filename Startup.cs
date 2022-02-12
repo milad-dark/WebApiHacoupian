@@ -10,10 +10,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
-using WebApiHacoupian.Interfaces;
-using WebApiHacoupian.Services;
-using WebApiHacoupian.Models;
 using WebApiHacoupian.Extention;
+using WebApiHacoupian.Interfaces;
+using WebApiHacoupian.Models;
+using WebApiHacoupian.Services;
 
 namespace WebApiHacoupian
 {

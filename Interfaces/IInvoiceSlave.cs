@@ -6,7 +6,7 @@ namespace WebApiHacoupian.Interfaces
 {
     public interface IInvoiceSlave
     {
-        Task<bool> Insert(TblInvoiceSlave invoiceSlave);
+        bool Insert(TblInvoiceSlave invoiceSlave);
         Task<IEnumerable<TblInvoiceSlave>> GetInvoiceSlaves(long invoiceMasterId);
     }
 }

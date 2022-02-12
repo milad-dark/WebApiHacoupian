@@ -21,12 +21,12 @@ namespace WebApiHacoupian.Services
             return await _context.TblInvoiceSlaves.Where(c => c.TblInvoiceMasterId == invoiceMasterId && c.IsDeleted == false).ToListAsync();
         }
 
-        public async Task<bool> Insert(TblInvoiceSlave invoiceSlave)
+        public bool Insert(TblInvoiceSlave invoiceSlave)
         {
             if (invoiceSlave != null)
             {
-                await _context.TblInvoiceSlaves.AddAsync(invoiceSlave);
-                await _context.SaveChangesAsync();
+                _context.TblInvoiceSlaves.Add(invoiceSlave);
+                _context.SaveChanges();
                 return true;
             }
             return false;

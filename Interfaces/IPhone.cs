@@ -21,7 +21,7 @@ namespace WebApiHacoupian.Interfaces
         Task<TblPhone> SelectByMobile(string phone);
 
 
-        Task<bool> Insert(TblPhone phone);
-        Task<bool> Update(TblPhone phone);
+        bool Insert(TblPhone phone);
+        bool Update(TblPhone phone);
     }
 }

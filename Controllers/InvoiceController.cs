@@ -118,7 +118,7 @@ namespace WebApiHacoupian.Controllers
                         IsSent = false,
                         IsDeleted = false
                     };
-                    await _invoiceMaster.Insert(invoiceMaster);
+                    _invoiceMaster.Insert(invoiceMaster);
                     var id = invoiceMaster.Id;
 
                     //Insert Slave
@@ -128,7 +128,7 @@ namespace WebApiHacoupian.Controllers
                     //Insert Payment
                     InsertPayment(onlineShop.payment, id);
                     //Insert Stock Sheet and Item
-                    var stockId = InsertStockSheet(invoiceMaster).Result;
+                    var stockId = InsertStockSheet(invoiceMaster);
                     InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
                     var invoiceId = new Invoice { InvoiceId = id };
@@ -198,7 +198,7 @@ namespace WebApiHacoupian.Controllers
                         IsDeleted = false,
                         IsSent = false
                     };
-                    _invoiceMasterPayment.Insert(payment).ConfigureAwait(false);
+                    _invoiceMasterPayment.Insert(payment);
                 }
             }
             catch (Exception ex)
@@ -231,7 +231,7 @@ namespace WebApiHacoupian.Controllers
                         };
                         lstDiscount.Add(discount);
                     }
-                    _invoiceMasterDiscount.Insert(lstDiscount).ConfigureAwait(false);
+                    _invoiceMasterDiscount.Insert(lstDiscount);
                 }
             }
             catch (Exception ex)
@@ -240,7 +240,7 @@ namespace WebApiHacoupian.Controllers
             }
         }
         //Insert StockSheet
-        private async Task<long> InsertStockSheet(TblInvoiceMaster invoiceMaster)
+        private long InsertStockSheet(TblInvoiceMaster invoiceMaster)
         {
             string StoreCodeNew;
             switch (invoiceMaster.TblInvoiceRegistrarId.ToString())
@@ -357,7 +357,7 @@ namespace WebApiHacoupian.Controllers
                     IsSent = false,
                     IsDeleted = false,
                 };
-                await _finishedGoodStockSheet.Insert(stockSheet);
+                _finishedGoodStockSheet.Insert(stockSheet);
                 return stockSheet.Id;
             }
             catch (Exception ex)
@@ -366,7 +366,7 @@ namespace WebApiHacoupian.Controllers
                 return 0;
             }
         }
-        private async void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
+        private void InsertStockItem(long StockId, List<TblInvoiceSlave> invoiceSlave)
         {
             try
             {
@@ -394,7 +394,7 @@ namespace WebApiHacoupian.Controllers
                         lstStockItem.Add(stockSheetItem);
                     }
                 }
-                await _finishedGoodStockSheetItem.Insert(lstStockItem);
+                _finishedGoodStockSheetItem.Insert(lstStockItem);
             }
             catch (Exception ex)
             {

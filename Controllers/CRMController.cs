@@ -210,7 +210,7 @@ namespace WebApiHacoupian.Controllers
                         IsSent = false,
                         IsDeleted = false
                     };
-                    await _phone.Insert(phone);
+                    _phone.Insert(phone);
 
                     if (!string.IsNullOrEmpty(customer.cityName))
                     {
@@ -232,7 +232,7 @@ namespace WebApiHacoupian.Controllers
                             IsSent = false,
                             IsDeleted = false
                         };
-                        await _place.Insert(place);
+                        _place.Insert(place);
                     }
 
                     return Ok(new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code });
@@ -382,7 +382,7 @@ namespace WebApiHacoupian.Controllers
                         place.AddressLine = customer.address;
                         place.TblCityId = cityId != null ? cityId.Id : 1;
                         place.PostalCode = customer.postalCode;
-                        await _place.Update(place);
+                        _place.Update(place);
                     }
                     catch (Exception ex)
                     {
@@ -411,7 +411,7 @@ namespace WebApiHacoupian.Controllers
                             IsSent = false,
                             IsDeleted = false
                         };
-                        await _place.Insert(insertPlace);
+                        _place.Insert(insertPlace);
                     }
                     catch (Exception ex)
                     {
@@ -426,7 +426,7 @@ namespace WebApiHacoupian.Controllers
         }
 
         //Insert Other Address
-        public async Task<ActionResult> InsertAddress([FromBody] PersonViewModel.CustomerAddAddress addressModel)
+        public ActionResult InsertAddress([FromBody] PersonViewModel.CustomerAddAddress addressModel)
         {
             if (ModelState.IsValid)
             {
@@ -450,7 +450,7 @@ namespace WebApiHacoupian.Controllers
                         IsSent = false,
                         IsDeleted = false
                     };
-                    await _place.Insert(place);
+                    _place.Insert(place);
                     return Ok(place.Id);
                 }
                 catch (Exception ex)
@@ -482,14 +482,14 @@ namespace WebApiHacoupian.Controllers
                         IsSent = false,
                         IsDeleted = false
                     };
-                    await _phone.Insert(phone);
+                    _phone.Insert(phone);
                     return Ok(phone.Id);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
                     return BadRequest($"Insert place error: {ex.Message} - {ex.InnerException}");
-                } 
+                }
             }
             return BadRequest("داده های ارسالی اشتباه است");
         }

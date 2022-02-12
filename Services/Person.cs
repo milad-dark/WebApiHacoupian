@@ -92,7 +92,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<TblPerson> SelectLastPerson()
         {
-            return await _context.TblPeople.OrderByDescending(p=>p.Id).FirstAsync();
+            return await _context.TblPeople.OrderByDescending(p => p.Id).FirstAsync();
         }
 
         public async Task<bool> Update(TblPerson person)

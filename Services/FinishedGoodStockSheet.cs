@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using WebApiHacoupian.Interfaces;
+﻿using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Services
@@ -13,12 +12,12 @@ namespace WebApiHacoupian.Services
             _context = context;
         }
 
-        public async Task<bool> Insert(TblFinishedGoodStockSheet finishedGoodStockSheet)
+        public bool Insert(TblFinishedGoodStockSheet finishedGoodStockSheet)
         {
             if (finishedGoodStockSheet != null)
             {
-                await _context.TblFinishedGoodStockSheets.AddAsync(finishedGoodStockSheet);
-                await _context.SaveChangesAsync();
+                _context.TblFinishedGoodStockSheets.Add(finishedGoodStockSheet);
+                _context.SaveChanges();
                 return true;
             }
             return false;

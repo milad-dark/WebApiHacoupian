@@ -25,23 +25,23 @@ namespace WebApiHacoupian.Services
             return await _context.TblPhones.Where(p => p.Number == phone && p.IsDeleted == false).ToListAsync();
         }
 
-        public async Task<bool> Insert(TblPhone phone)
+        public bool Insert(TblPhone phone)
         {
             if (phone != null)
             {
-                await _context.TblPhones.AddAsync(phone);
-                await _context.SaveChangesAsync();
+                _context.TblPhones.Add(phone);
+                _context.SaveChanges();
                 return true;
             }
             return false;
         }
 
-        public async Task<bool> Update(TblPhone phone)
+        public bool Update(TblPhone phone)
         {
             if (phone != null)
             {
                 _context.Update(phone);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return true;
             }
             return false;

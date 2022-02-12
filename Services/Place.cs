@@ -15,12 +15,12 @@ namespace WebApiHacoupian.Services
             _context = context;
         }
 
-        public async Task<bool> Insert(TblPlace place)
+        public bool Insert(TblPlace place)
         {
             if (place != null)
             {
-                await _context.TblPlaces.AddAsync(place);
-                await _context.SaveChangesAsync();
+                _context.TblPlaces.Add(place);
+                _context.SaveChanges();
                 return true;
             }
             return false;
@@ -31,12 +31,12 @@ namespace WebApiHacoupian.Services
             return await _context.TblPlaces.Where(p => p.TblPersonId == personId && p.IsDeleted == false).ToListAsync();
         }
 
-        public async Task<bool> Update(TblPlace place)
+        public bool Update(TblPlace place)
         {
             if (place != null)
             {
                 _context.Update(place);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return true;
             }
             return false;

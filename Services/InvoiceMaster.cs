@@ -15,12 +15,12 @@ namespace WebApiHacoupian.Services
             _context = context;
         }
 
-        public async Task<bool> Insert(TblInvoiceMaster invoiceMaster)
+        public bool Insert(TblInvoiceMaster invoiceMaster)
         {
             if (invoiceMaster != null)
             {
-                await _context.TblInvoiceMasters.AddAsync(invoiceMaster);
-                await _context.SaveChangesAsync();
+                _context.TblInvoiceMasters.Add(invoiceMaster);
+                _context.SaveChanges();
                 return true;
             }
             return false;

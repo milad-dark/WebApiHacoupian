@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using WebApiHacoupian.Models;
 
-namespace WebApiHacoupian.Services
+namespace WebApiHacoupian.Interfaces
 {
     public interface IInvoiceMasterRemain
     {

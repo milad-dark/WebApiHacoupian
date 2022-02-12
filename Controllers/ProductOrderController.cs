@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebApiHacoupian.Interfaces;
-using WebApiHacoupian.ViewModel;
 using WebApiHacoupian.Models;
+using WebApiHacoupian.ViewModel;
 
 namespace WebApiHacoupian.Controllers
 {

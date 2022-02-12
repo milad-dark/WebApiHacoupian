@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-namespace WebApiHacoupian.ViewModel
+﻿namespace WebApiHacoupian.ViewModel
 {
     public class PersonViewModel
     {
