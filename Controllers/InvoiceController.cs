@@ -54,7 +54,7 @@ namespace WebApiHacoupian.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] OnlineShopModel onlineShop)
+        public ActionResult Post([FromBody] OnlineShopModel onlineShop)
         {
             //1935 placeType and person 523841 zahedi and registrar 34
             if (ModelState.IsValid)
