@@ -151,7 +151,7 @@ namespace WebApiHacoupian.Controllers
                     if (isExistPhone != null)
                     {
                         var updated = UpdateCustomer(customer).Result;
-                        return updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : Ok("مشترک مورد نظر یافت نشده یا خطایی رخ داده است");
+                        return updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : BadRequest("مشترک مورد نظر یافت نشده یا خطایی رخ داده است");
                     }
                 }
                 catch (Exception ex)
@@ -354,7 +354,7 @@ namespace WebApiHacoupian.Controllers
                 var phones = await _phone.SelectByNumber(customer.mobile);
                 var person = _person.SelectCustomerById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
 
-                if (person != null)
+                if (person != null && person.TblPersonTypeId == 100)
                 {
                     try
                     {
@@ -419,9 +419,13 @@ namespace WebApiHacoupian.Controllers
                             _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
                         }
                     }
+
                     return new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code };
                 }
-                return new PersonViewModel.CustomerAddView() { user_id = 0, user_code = 0 };
+                else
+                {
+                    return new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code };
+                }
             }
             return new PersonViewModel.CustomerAddView() { user_id = 0, user_code = 0 };
         }
