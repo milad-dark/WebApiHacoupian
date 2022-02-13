@@ -61,7 +61,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblPerson>> SelectPersonById(long id)
         {
-            return await _context.TblPeople.Where(p => p.Id == id && p.IsDeleted == false).ToListAsync();
+            return await _context.TblPeople.Where(p => p.Id == id && p.IsDeleted == false && p.TblPersonTypeId == 100 && p.CardNumber == -1).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonByNationalCode(string nationalCode)

@@ -184,16 +184,16 @@ namespace WebApiHacoupian.Controllers
                         BirthCertificateNumber = "1234567890",
                         IssueDate = DateTime.Now.ToShamsi(),
                         Email = customer.email,
-                        GetEmail = false,
+                        GetEmail = true,
                         GetSms = true,
                         Nfc = "",
                         Explanation = "#LogedUserFromOnlineShop",
                         Status = 4,
                         DeathDate = "",
                         MarriageDate = "",
-                        CardNumber = 0,
+                        CardNumber = -1,
                         Code = lastCode,
-                        FileNumber = 0,
+                        FileNumber = -1,
                         Guid = Guid.NewGuid(),
                         IsSent = false,
                         IsDeleted = false
@@ -355,40 +355,46 @@ namespace WebApiHacoupian.Controllers
                     return new PersonViewModel.CustomerAddView() { user_id = 0, user_code = 0 };
 
                 var phones = await _phone.SelectByNumber(customer.mobile);
-                var cityId = await _city.SelectCityIdByCityName(customer.cityName);
 
                 var person = _person.SelectPersonById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
-                try
-                {
-                    person.FirstName = customer.name;
-                    person.LastName = customer.last_name;
-                    //person.NationalCode = customer.national_code;
-                    //person.BirthDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(customer.birthdate).ToShamsi();
-                    person.Email = customer.email;
-                    person.Sex = customer.sex;
-                    await _person.Update(person);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Update person error: {ex.Message} - {ex.InnerException}");
-                }
-
-
-                var place = _place.SelectPlaceByPersonId(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
-                if (place != null)
+                if (person != null)
                 {
                     try
                     {
-                        place.AddressLine = customer.address;
-                        place.TblCityId = cityId != null ? cityId.Id : 1;
-                        place.PostalCode = customer.postalCode;
-                        _place.Update(place);
+                        person.FirstName = customer.name;
+                        person.LastName = customer.last_name;
+                        //person.NationalCode = customer.national_code;
+                        //person.BirthDate = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(customer.birthdate).ToShamsi();
+                        person.Email = customer.email;
+                        person.Sex = customer.sex;
+                        await _person.Update(person);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError($"Update place error: {ex.Message} - {ex.InnerException}");
+                        _logger.LogError($"Update person error: {ex.Message} - {ex.InnerException}");
                     }
+                }
+                var cityId = await _city.SelectCityIdByCityName(customer.cityName);
+                if (person != null)
+                {
+                    var place = _place.SelectPlaceByPersonId(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
+                    if (place != null)
+                    {
+                        try
+                        {
 
+                            place.AddressLine = customer.address;
+                            place.TblCityId = cityId != null ? cityId.Id : 1;
+                            place.PostalCode = customer.postalCode;
+                            _place.Update(place);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Update place error: {ex.Message} - {ex.InnerException}");
+                        }
+
+                    }
                 }
                 else
                 {
@@ -417,7 +423,6 @@ namespace WebApiHacoupian.Controllers
                     {
                         _logger.LogError($"Insert place error: {ex.Message} - {ex.InnerException}");
                     }
-
                 }
 
                 return new PersonViewModel.CustomerAddView() { user_id = person.Id, user_code = person.Code };
