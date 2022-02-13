@@ -61,7 +61,11 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblPerson>> SelectPersonById(long id)
         {
-            return await _context.TblPeople.Where(p => p.Id == id && p.IsDeleted == false && p.TblPersonTypeId == 100 && p.CardNumber == -1).ToListAsync();
+            return await _context.TblPeople.Where(p => p.Id == id && p.IsDeleted == false).ToListAsync();
+        }
+        public async Task<IEnumerable<TblPerson>> SelectCustomerById(long id)
+        {
+            return await _context.TblPeople.Where(p => p.Id == id && p.IsDeleted == false && p.TblPersonTypeId == 100).ToListAsync();
         }
 
         public async Task<IEnumerable<TblPerson>> SelectPersonByNationalCode(string nationalCode)
@@ -90,9 +94,9 @@ namespace WebApiHacoupian.Services
             throw new NotImplementedException();
         }
 
-        public async Task<TblPerson> SelectLastPerson()
+        public async Task<TblPerson> SelectLastCustomer()
         {
-            return await _context.TblPeople.OrderByDescending(p => p.Id).FirstAsync();
+            return await _context.TblPeople.Where(p => p.TblPersonTypeId == 100).OrderByDescending(p => p.Code).FirstAsync();
         }
 
         public async Task<bool> Update(TblPerson person)
@@ -105,5 +109,7 @@ namespace WebApiHacoupian.Services
             }
             return false;
         }
+
+        
     }
 }

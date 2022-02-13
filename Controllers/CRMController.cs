@@ -151,7 +151,7 @@ namespace WebApiHacoupian.Controllers
                     if (isExistPhone != null)
                     {
                         var updated = UpdateCustomer(customer).Result;
-                        return updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : BadRequest("مشترک مورد نظر یافت نشده یا خطایی رخ داده است");
+                        return updated.user_id != 0 ? Ok(new PersonViewModel.CustomerAddView() { user_id = updated.user_id, user_code = updated.user_code }) : Ok("مشترک مورد نظر یافت نشده یا خطایی رخ داده است");
                     }
                 }
                 catch (Exception ex)
@@ -160,7 +160,7 @@ namespace WebApiHacoupian.Controllers
                     return BadRequest("error in update");
                 }
 
-                var lastPerson = _person.SelectLastPerson();
+                var lastPerson = _person.SelectLastCustomer();
                 var lastCode = lastPerson.Result.Code + 1;
                 try
                 {
@@ -352,7 +352,7 @@ namespace WebApiHacoupian.Controllers
             if (ModelState.IsValid)
             {
                 var phones = await _phone.SelectByNumber(customer.mobile);
-                var person = _person.SelectPersonById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
+                var person = _person.SelectCustomerById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
 
                 if (person != null)
                 {
@@ -472,7 +472,7 @@ namespace WebApiHacoupian.Controllers
                     return BadRequest("Phone Existed!!!");
                 try
                 {
-                    var person = await _person.SelectPersonById(phoneModel.user_id);
+                    var person = await _person.SelectCustomerById(phoneModel.user_id);
                     TblPhone phone = new()
                     {
                         TblPersonId = phoneModel.user_id,

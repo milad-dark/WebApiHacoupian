@@ -33,7 +33,7 @@ namespace WebApiHacoupian.Services
 
         public async Task<TblInvoiceMaster> SelectLastNumberFactor(long placeType)
         {
-            return await _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false).OrderByDescending(p => p.Id).FirstOrDefaultAsync();
+            return await _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false).OrderByDescending(p => p.InvoiceNumber).FirstOrDefaultAsync();
         }
     }
 }
