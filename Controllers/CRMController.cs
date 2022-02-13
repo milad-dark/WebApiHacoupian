@@ -374,7 +374,7 @@ namespace WebApiHacoupian.Controllers
                     var cityId = await _city.SelectCityIdByCityName(customer.cityName);
                     var place = _place.SelectPlaceByPersonId(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
 
-                    if (place != null)
+                    if (place != null && !string.IsNullOrEmpty(customer.address))
                     {
                         try
                         {
@@ -382,7 +382,6 @@ namespace WebApiHacoupian.Controllers
                             place.TblCityId = cityId != null ? cityId.Id : 1;
                             place.PostalCode = customer.postalCode;
                             _place.Update(place);
-
                         }
                         catch (Exception ex)
                         {
