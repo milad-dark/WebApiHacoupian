@@ -95,7 +95,7 @@ namespace WebApiHacoupian.Controllers
                         TblPlaceTypeIdAsReceiver = 2948,//فروشگاه آنلاین (2948)
                         TblPersonIdAsIssuer = 523841,//زاهدی
                         TblPersonIdAsReceiver = 523841,//زاهدی
-                        TblInitializedTypeId = 3,//فاکتور
+                        TblInitializedTypeId = 3,//فاکتور=3 - مرجوعی=5
                         TblEffectiveTypeId = 2,//2=moshtarekin,4=moshtari adi,7=personel
                         TblInvoiceRegistrarId = 34,//فروشگاه آنلاین
                         TblInvoiceStatusId = 1,
@@ -128,7 +128,7 @@ namespace WebApiHacoupian.Controllers
                     //Insert Payment
                     InsertPayment(onlineShop.payment, id);
                     //Insert Stock Sheet and Item
-                    var stockId = InsertStockSheet(invoiceMaster);
+                    var stockId = InsertStockSheet(invoiceMaster, false);
                     InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
                     var invoiceId = new Invoice { InvoiceId = id };
@@ -142,6 +142,98 @@ namespace WebApiHacoupian.Controllers
                 }
             }
             return BadRequest("داده های ارسالی اشتباه میباشد");
+        }
+
+        [HttpPost("Returned")]// returned invoice from online shop
+        public ActionResult Returned([FromBody] OnlineShopReturnedModel onlineShop)
+        {
+            if (ModelState.IsValid)
+            {
+                _logger.LogInformation("Data Invoice Returned: ", onlineShop);
+
+                if (onlineShop.invoice_id == 0)
+                    return BadRequest("فاکتور فاقد آیدی دات نت میباشد");
+                if (onlineShop.order_items.Count == 0)
+                    return BadRequest("فاکتور بدون آیتم میباشد");
+                if (string.IsNullOrEmpty(onlineShop.user_name) || string.IsNullOrEmpty(onlineShop.user_code))
+                    return BadRequest("تام مشترک یا کد مشترک خالی/صفر میباشد");
+                if (onlineShop.invoice_number == 0)
+                    return BadRequest("فاکتور فاقد شماره میباشد");
+                if (onlineShop.payment == 0)
+                    return BadRequest("فاکتور فاقد پرداختی میباشد");
+
+                try
+                {
+                    //Check Product list existed in DB
+                    foreach (var item in onlineShop.order_items)
+                    {
+                        var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.barcode).Result;
+                        if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.barcode));
+                    }
+
+                    var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948).Result;//فروشگاه آنلاین (2948) - last Number
+                    Int32 totalTax = 0;
+                    foreach (var item in onlineShop.order_items)
+                    {
+                        totalTax += (Int32)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero);
+                    }
+                    var invoiceMaster = new TblInvoiceMaster
+                    {
+                        TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
+                        TblCompanyIdAsReceiver = onlineShop.orgin,
+                        TblCompanyIdAsIssuer = onlineShop.orgin,
+                        TblPlaceTypeIdAsIssuer = 2948,//فروشگاه آنلاین (2948)
+                        TblPlaceTypeIdAsReceiver = 2948,//فروشگاه آنلاین (2948)
+                        TblPersonIdAsIssuer = 523841,//زاهدی
+                        TblPersonIdAsReceiver = 523841,//زاهدی
+                        TblInitializedTypeId = 5,//فاکتور=3 - مرجوعی=5
+                        TblEffectiveTypeId = 2,//2=moshtarekin,4=moshtari adi,7=personel
+                        TblInvoiceRegistrarId = 34,//فروشگاه آنلاین
+                        TblInvoiceStatusId = 1,
+                        TblPersonId = 523841,
+                        InvoiceDate = dateInvoice.ToShamsi(),
+                        InvoiceDateTime = dateInvoice,
+                        InvoiceTime = dateInvoice.TimeOfDay,
+                        InvoiceNumber = (lastInvoice != null) ? lastInvoice.InvoiceNumber + 1 : 1,
+                        InvoiceTo = onlineShop.user_name,
+                        ParentIdFromReturn = 0,
+                        ParentId = onlineShop.invoice_id,
+                        EffectiveCode = onlineShop.user_code,
+                        Comment = onlineShop.invoice_number.ToString(),
+                        TaxPercent = "0.09",
+                        Tax = totalTax.ToString(),
+                        CanBeReturned = false,
+                        Explanation = "From Online Shop Returned",
+                        Status = 1,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false
+                    };
+                    _invoiceMaster.Insert(invoiceMaster);
+                    var id = invoiceMaster.Id;
+
+                    //Insert Slave
+                    InsertSlaves(onlineShop.order_items, id);
+                    //Insert Discount
+                    InsertDiscounts(onlineShop.discounts, id);
+                    //Insert Payment
+                    InsertPayment(onlineShop.payment, id);
+                    //Insert Stock Sheet and Item
+                    var stockId = InsertStockSheet(invoiceMaster,true);
+                    InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
+
+                    var invoiceId = new Invoice { InvoiceId = id };
+                    //return Ok($"InvoiceId: {id}");
+                    return Ok(invoiceId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Insert Invoice error: {ex.Message} - {ex.InnerException}");
+                    BadRequest(ex.Message);
+                }
+            }
+            return BadRequest();
         }
         //Insert Order Items To TblInvoiceSlave
         private void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
@@ -240,7 +332,7 @@ namespace WebApiHacoupian.Controllers
             }
         }
         //Insert StockSheet
-        private long InsertStockSheet(TblInvoiceMaster invoiceMaster)
+        private long InsertStockSheet(TblInvoiceMaster invoiceMaster, bool returned)
         {
             string StoreCodeNew;
             switch (invoiceMaster.TblInvoiceRegistrarId.ToString())
@@ -337,7 +429,9 @@ namespace WebApiHacoupian.Controllers
 
             try
             {
-                TblFinishedGoodStockSheet stockSheet = new()
+                TblFinishedGoodStockSheet stockSheet;
+                if (!returned)
+                     stockSheet = new()
                 {
                     TblCompanyIdAsOwner = 2,
                     TblCompanyIdAsReceiver = 12336,
@@ -357,6 +451,27 @@ namespace WebApiHacoupian.Controllers
                     IsSent = false,
                     IsDeleted = false,
                 };
+                else
+                    stockSheet = new()
+                    {
+                        TblCompanyIdAsOwner = 2,
+                        TblCompanyIdAsReceiver = 12336,
+                        TblCompanyIdAsIssuer = null,
+                        TblPlaceTypeIdAsReceiver = null,
+                        TblPlaceTypeIdAsIssuer = Convert.ToInt64(StoreCodeNew),
+                        TblPersonIdAsIssuer = null,
+                        TblPersonIdAsReceiver = null,
+                        TblFinishedGoodStockSheetTypeId = 4,
+                        TblFinishedGoodStockSheetSubTypeId = 4,
+                        SheetIndex = 1,
+                        SheetNumber = invoiceMaster.InvoiceNumber,
+                        Date = invoiceMaster.InvoiceDate,
+                        Explanation = "From Online Shop Returned",
+                        Status = 0,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false,
+                    };
                 _finishedGoodStockSheet.Insert(stockSheet);
                 return stockSheet.Id;
             }

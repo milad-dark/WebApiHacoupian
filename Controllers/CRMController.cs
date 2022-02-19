@@ -431,6 +431,7 @@ namespace WebApiHacoupian.Controllers
         }
 
         //Insert Other Address
+        [HttpPost]
         public ActionResult InsertAddress([FromBody] PersonViewModel.CustomerAddAddress addressModel)
         {
             if (ModelState.IsValid)
@@ -466,7 +467,7 @@ namespace WebApiHacoupian.Controllers
             }
             return BadRequest("داده های ارسالی اشتباه است");
         }
-
+        [HttpPost]
         public async Task<ActionResult> InsertPhone([FromBody] PersonViewModel.CustomerAddPhone phoneModel)
         {
             if (ModelState.IsValid)
