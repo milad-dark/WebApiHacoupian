@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 using WebApiHacoupian.ViewModel;
@@ -153,6 +152,8 @@ namespace WebApiHacoupian.Controllers
 
                 if (onlineShop.invoice_id == 0)
                     return BadRequest("فاکتور فاقد آیدی دات نت میباشد");
+                if (_invoiceMaster.SelectInvoiceMasterById(onlineShop.invoice_id).Result == null)
+                    return BadRequest("فاکتور با این آیدی دات نت یافت نشد");
                 if (onlineShop.order_items.Count == 0)
                     return BadRequest("فاکتور بدون آیتم میباشد");
                 if (string.IsNullOrEmpty(onlineShop.user_name) || string.IsNullOrEmpty(onlineShop.user_code))
@@ -220,7 +221,7 @@ namespace WebApiHacoupian.Controllers
                     //Insert Payment
                     InsertPayment(onlineShop.payment, id);
                     //Insert Stock Sheet and Item
-                    var stockId = InsertStockSheet(invoiceMaster,true);
+                    var stockId = InsertStockSheet(invoiceMaster, true);
                     InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);
 
                     var invoiceId = new Invoice { InvoiceId = id };
@@ -251,7 +252,7 @@ namespace WebApiHacoupian.Controllers
                             PartCode = item.barcode,
                             PartCount = item.count,
                             ItemIndex = indexItem,
-                            SalePrice = (long)(item.price / 1.09),
+                            SalePrice = (long)Math.Round((item.price / 1.09), 0, MidpointRounding.ToPositiveInfinity),
                             PartTax = (long)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero),
                             PartDiscount = 0,
                             Explanation = "From Online Shop",
@@ -431,26 +432,26 @@ namespace WebApiHacoupian.Controllers
             {
                 TblFinishedGoodStockSheet stockSheet;
                 if (!returned)
-                     stockSheet = new()
-                {
-                    TblCompanyIdAsOwner = 2,
-                    TblCompanyIdAsReceiver = 12336,
-                    TblCompanyIdAsIssuer = null,
-                    TblPlaceTypeIdAsReceiver = null,
-                    TblPlaceTypeIdAsIssuer = Convert.ToInt64(StoreCodeNew),
-                    TblPersonIdAsIssuer = null,
-                    TblPersonIdAsReceiver = null,
-                    TblFinishedGoodStockSheetTypeId = 5,
-                    TblFinishedGoodStockSheetSubTypeId = 5,
-                    SheetIndex = 1,
-                    SheetNumber = invoiceMaster.InvoiceNumber,
-                    Date = invoiceMaster.InvoiceDate,
-                    Explanation = "From Online Shop",
-                    Status = 0,
-                    Guid = Guid.NewGuid(),
-                    IsSent = false,
-                    IsDeleted = false,
-                };
+                    stockSheet = new()
+                    {
+                        TblCompanyIdAsOwner = 2,
+                        TblCompanyIdAsReceiver = 12336,
+                        TblCompanyIdAsIssuer = null,
+                        TblPlaceTypeIdAsReceiver = null,
+                        TblPlaceTypeIdAsIssuer = Convert.ToInt64(StoreCodeNew),
+                        TblPersonIdAsIssuer = null,
+                        TblPersonIdAsReceiver = null,
+                        TblFinishedGoodStockSheetTypeId = 5,
+                        TblFinishedGoodStockSheetSubTypeId = 5,
+                        SheetIndex = 1,
+                        SheetNumber = invoiceMaster.InvoiceNumber,
+                        Date = invoiceMaster.InvoiceDate,
+                        Explanation = "From Online Shop",
+                        Status = 0,
+                        Guid = Guid.NewGuid(),
+                        IsSent = false,
+                        IsDeleted = false,
+                    };
                 else
                     stockSheet = new()
                     {
