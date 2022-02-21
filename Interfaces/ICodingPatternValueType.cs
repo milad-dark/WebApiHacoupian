@@ -12,5 +12,18 @@ namespace WebApiHacoupian.Interfaces
         /// <param name="CodingPatternValue_Ids"></param>
         /// <returns></returns>
         Task<IEnumerable<TblCodingPatternValueType>> GetPatternValueTypes(List<long> CodingPatternValue_Ids);
+        /// <summary>
+        /// Get Model Name with Product Code
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns>Coding Name</returns>
+        Task<TblCodingPatternValueType> GetPatternValueTypesByCode(string code);
+        /// <summary>
+        /// Get Color Name with Product Code
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns>Coding Name</returns>
+        Task<TblCodingPatternValueType> GetPatternValueColorByCode(string code);
+
     }
 }

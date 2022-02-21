@@ -20,5 +20,16 @@ namespace WebApiHacoupian.Services
         {
             return await _context.TblCodingPatternValueTypes.Where(c => CodingPatternValue_Ids.Contains(c.Id)).ToListAsync();
         }
+
+        public async Task<TblCodingPatternValueType> GetPatternValueTypesByCode(string code)
+        {
+            return await _context.TblCodingPatternValueTypes.FirstOrDefaultAsync(
+                c => c.Code == code && c.TblCodingPatternKeyId == 18 && !c.IsDeleted);
+        }
+        public async Task<TblCodingPatternValueType> GetPatternValueColorByCode(string code)
+        {
+            return await _context.TblCodingPatternValueTypes.FirstOrDefaultAsync(
+                c => c.Code == code && c.TblCodingPatternKeyId == 15 && !c.IsDeleted);
+        }
     }
 }
