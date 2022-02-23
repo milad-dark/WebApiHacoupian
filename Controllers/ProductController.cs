@@ -32,7 +32,10 @@ namespace WebApiHacoupian.Controllers
             var getColor = await _codingPatternValueType.GetPatternValueColorByCode(productViewModel.barcode.Substring(5, 2));
 
             if (getType != null && getColor != null)
-                return Ok(new { name = getType.Name + " " + getColor.Name + " سایز " + productViewModel.barcode.Substring(7, 2) });
+                return Ok(new { name = getType.Name,
+                    color = getColor.Name,
+                    size = productViewModel.barcode.Substring(7, 2) 
+                });
 
             //System.Net.Http.Json.JsonContent.Create(new { barcode = barcode });
             return NotFound();

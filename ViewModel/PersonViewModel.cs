@@ -62,6 +62,11 @@
             public string mobile { get; set; }
         }
 
+        public class CustomerPhone
+        {
+            public string mobile { get; set; }
+        }
+
         public class CustomerAddView
         {
             public long user_id { get; set; }

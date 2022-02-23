@@ -246,6 +246,30 @@ namespace WebApiHacoupian.Controllers
             return BadRequest("اطلاعات ارسالی اشتباه است");
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetCustomer([FromBody] PersonViewModel.CustomerPhone phone)
+        {
+            var phones = await _phone.SelectByNumber(phone.mobile);
+            var person = _person.SelectCustomerById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
+            var address = _place.SelectPlaceByPersonId(person.Id).Result.FirstOrDefault();
+
+            if (person != null && person.TblPersonTypeId == 100)
+            {
+                return Ok(new
+                {
+                    first_name = person.FirstName,
+                    last_name = person.LastName,
+                    national_code = person.NationalCode,
+                    birthdate = person.BirthDate,
+                    email = person.Email,
+                    sex = person.Sex,
+                    postalCode = address.PostalCode,
+                    address = address.AddressLine
+                });
+            }
+            return NotFound();
+        }
+
         //Search In DataBase Person by Input Value
         private async Task<List<CustomerViewModel>> SearchPerson(IEnumerable<TblPerson> person)
         {
