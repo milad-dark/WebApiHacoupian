@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using WebApiHacoupian.Extention;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 using WebApiHacoupian.ViewModel;
@@ -18,38 +20,35 @@ namespace WebApiHacoupian.Controllers
         private readonly IInvoiceMaster _invoiceMaster;
         private readonly IInvoiceMasterDiscount _invoiceMasterDiscount;
         private readonly IInvoiceMasterPayment _invoiceMasterPayment;
-        private readonly IInvoiceMasterPrePayment _invoiceMasterPrePayment;
         private readonly IInvoiceSlave _invoiceSlave;
-        private readonly IRegistrarType _registrarType;
         private readonly IFinishedGoodStockSheet _finishedGoodStockSheet;
         private readonly IFinishedGoodStockSheetItem _finishedGoodStockSheetItem;
         private readonly IFinishedGoodProduct _finishedGoodProduct;
         private readonly ILogger<InvoiceController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         #endregion
         public InvoiceController(
             IPerson person,
             IInvoiceMaster invoiceMaster,
             IInvoiceMasterDiscount invoiceMasterDiscount,
             IInvoiceMasterPayment invoiceMasterPayment,
-            IInvoiceMasterPrePayment invoiceMasterPrePayment,
             IInvoiceSlave invoiceSlave,
-            IRegistrarType registrarType,
             IFinishedGoodStockSheet finishedGoodStockSheet,
             IFinishedGoodStockSheetItem finishedGoodStockSheetItem,
             IFinishedGoodProduct finishedGoodProduct,
-            ILogger<InvoiceController> logger)
+            ILogger<InvoiceController> logger,
+            IWebHostEnvironment webHostEnvironment)
         {
             _person = person;
             _invoiceMaster = invoiceMaster;
             _invoiceMasterDiscount = invoiceMasterDiscount;
             _invoiceMasterPayment = invoiceMasterPayment;
-            _invoiceMasterPrePayment = invoiceMasterPrePayment;
             _invoiceSlave = invoiceSlave;
-            _registrarType = registrarType;
             _finishedGoodStockSheet = finishedGoodStockSheet;
             _finishedGoodStockSheetItem = finishedGoodStockSheetItem;
             _finishedGoodProduct = finishedGoodProduct;
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpPost]
@@ -58,7 +57,7 @@ namespace WebApiHacoupian.Controllers
             //1935 placeType and person 523841 zahedi and registrar 34
             if (ModelState.IsValid)
             {
-                _logger.LogInformation("Data Invoice: ", onlineShop);
+                _logger.LogInformation("Data Invoice: ", onlineShop.ToString());
 
                 if (onlineShop.order_items.Count == 0)
                     return BadRequest("فاکتور بدون آیتم میباشد");
@@ -79,12 +78,17 @@ namespace WebApiHacoupian.Controllers
                     }
 
                     var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
-                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948).Result;//فروشگاه آنلاین (2948) - last Number
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948);//فروشگاه آنلاین (2948) - last Number
+                    int invoiceNumberFile = new JsonFileCreator(_webHostEnvironment).GetJson(number: lastInvoice++.ToString());
                     Int32 totalTax = 0;
+
                     foreach (var item in onlineShop.order_items)
                     {
                         totalTax += (Int32)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero);
                     }
+
+                    if (invoiceNumberFile == 0) lastInvoice++;
+
                     var invoiceMaster = new TblInvoiceMaster
                     {
                         TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
@@ -102,7 +106,7 @@ namespace WebApiHacoupian.Controllers
                         InvoiceDate = dateInvoice.ToShamsi(),
                         InvoiceDateTime = dateInvoice,
                         InvoiceTime = dateInvoice.TimeOfDay,
-                        InvoiceNumber = (lastInvoice != null) ? lastInvoice.InvoiceNumber + 1 : 1,
+                        InvoiceNumber = lastInvoice,
                         InvoiceTo = onlineShop.user_name,
                         ParentIdFromReturn = 0,
                         ParentId = 0,
@@ -119,6 +123,7 @@ namespace WebApiHacoupian.Controllers
                     };
                     _invoiceMaster.Insert(invoiceMaster);
                     var id = invoiceMaster.Id;
+                    new JsonFileCreator(_webHostEnvironment).InsertJson(lastInvoice.ToString());
 
                     //Insert Slave
                     InsertSlaves(onlineShop.order_items, id);
@@ -173,7 +178,7 @@ namespace WebApiHacoupian.Controllers
                     }
 
                     var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
-                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948).Result;//فروشگاه آنلاین (2948) - last Number
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948);//فروشگاه آنلاین (2948) - last Number
                     Int32 totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {
@@ -196,7 +201,7 @@ namespace WebApiHacoupian.Controllers
                         InvoiceDate = dateInvoice.ToShamsi(),
                         InvoiceDateTime = dateInvoice,
                         InvoiceTime = dateInvoice.TimeOfDay,
-                        InvoiceNumber = (lastInvoice != null) ? lastInvoice.InvoiceNumber + 1 : 1,
+                        InvoiceNumber = (lastInvoice != 0) ? lastInvoice + 1 : 1,
                         InvoiceTo = onlineShop.user_name,
                         ParentIdFromReturn = 0,
                         ParentId = onlineShop.invoice_id,
