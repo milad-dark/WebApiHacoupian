@@ -46,20 +46,21 @@ namespace WebApiHacoupian.Extention
             string path = _webHostEnvironment.ContentRootPath + "\\logs\\invoiceNumber.txt";
             try
             {
+                string lastNumber = "0";
                 using (StreamReader sr = File.OpenText(path))
                 {
-                    string lastNumber = "0";
                     lastNumber = sr.ReadLine();
                     sr.Close();
-                    if (Convert.ToInt32(lastNumber) == Convert.ToInt32(number))
-                    {
-                        using (StreamWriter file = File.CreateText(path))
-                        {
-                            file.WriteLine((Convert.ToInt32(number) + 1).ToString());
-                        }
-                    }
-                    return Convert.ToInt32(lastNumber);
                 }
+                if (Convert.ToInt32(lastNumber) == Convert.ToInt32(number))
+                {
+                    using (StreamWriter file = File.CreateText(path))
+                    {
+                        file.WriteLine((Convert.ToInt32(number) + 1).ToString());
+                        file.Close();
+                    }
+                }
+                return Convert.ToInt32(lastNumber);
             }
             catch (Exception)
             {

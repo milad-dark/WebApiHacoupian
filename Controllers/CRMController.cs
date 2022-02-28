@@ -246,7 +246,7 @@ namespace WebApiHacoupian.Controllers
             return BadRequest("اطلاعات ارسالی اشتباه است");
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult> GetCustomer([FromBody] PersonViewModel.CustomerPhone phone)
         {
             var phones = await _phone.SelectByNumber(phone.mobile);
@@ -264,7 +264,9 @@ namespace WebApiHacoupian.Controllers
                     email = person.Email,
                     sex = person.Sex,
                     postalCode = address.PostalCode,
-                    address = address.AddressLine
+                    address = address.AddressLine,
+                    code = person.Code,
+                    id = person.Id
                 });
             }
             return NotFound();
