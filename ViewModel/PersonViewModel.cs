@@ -41,7 +41,7 @@
             public string last_name { get; set; }
             public string mobile { get; set; }
             public string national_code { get; set; }
-            public double birthdate { get; set; }
+            public string birthdate { get; set; }
             public string email { get; set; }
             public bool sex { get; set; }
             public string cityName { get; set; }

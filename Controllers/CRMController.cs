@@ -171,7 +171,7 @@ namespace WebApiHacoupian.Controllers
                         FatherName = "FatherName",
                         Password = "",
                         NationalCode = customer.national_code,
-                        BirthDate = EpouchConvertor.EpouchToDateTime(customer.birthdate).ToShamsi(),
+                        BirthDate = Convert.ToDateTime(customer.birthdate).ToShamsi(),
                         Sex = customer.sex,
                         TblPersonTypeId = 100,
                         TblCountryIdAsNationality = 1,
