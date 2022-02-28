@@ -247,11 +247,13 @@ namespace WebApiHacoupian.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> GetCustomer([FromBody] PersonViewModel.CustomerPhone phone)
+        public async Task<ActionResult> GetCustomer([FromBody] PersonViewModel.CustomerPhone mobile)
         {
-            var phones = await _phone.SelectByNumber(phone.mobile);
-            var person = _person.SelectCustomerById(phones.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
-            var address = _place.SelectPlaceByPersonId(person.Id).Result.FirstOrDefault();
+            var phone = await _phone.SelectByNumber(mobile.mobile);
+            if (!phone.Any()) return NotFound();
+
+            var person = _person.SelectCustomerById(phone.FirstOrDefault().TblPersonId).Result.FirstOrDefault();
+            var address = await _place.SelectPlaceByPersonId(person.Id);
 
             if (person != null && person.TblPersonTypeId == 100)
             {
@@ -263,8 +265,8 @@ namespace WebApiHacoupian.Controllers
                     birthdate = person.BirthDate,
                     email = person.Email,
                     sex = person.Sex,
-                    postalCode = address.PostalCode,
-                    address = address.AddressLine,
+                    postalCode = address.Any()  ? address.FirstOrDefault().PostalCode: "",
+                    address = address.Any() ? address.FirstOrDefault().AddressLine : "",
                     code = person.Code,
                     id = person.Id
                 });
