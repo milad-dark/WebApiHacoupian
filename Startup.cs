@@ -48,6 +48,7 @@ namespace WebApiHacoupian
             //Add Interface and Service To Core
             services.AddTransient<MainContext>();
             services.AddTransient<IPerson, Person>();
+            services.AddTransient<IPersonCharge, PersonCharge>();
             services.AddTransient<IPersonRole, PersonRole>();
             services.AddTransient<ICertificate, Certificate>();
             services.AddTransient<ICity, City>();
@@ -72,6 +73,7 @@ namespace WebApiHacoupian
             services.AddTransient<IInvoiceMasterPayment, InvoiceMasterPayment>();
             services.AddTransient<IInvoiceMasterPrePayment, InvoiceMasterPrePayment>();
             services.AddTransient<IInvoiceMasterRemain, InvoiceMasterRemain>();
+            services.AddTransient<IInvoiceMasterPoint, InvoiceMasterPoint>();
             services.AddTransient<IInvoiceSlave, InvoiceSlave>();
             services.AddTransient<IRegistrarType, RegistrarType>();
             services.AddTransient<IFinishedGoodStockSheet, FinishedGoodStockSheet>();

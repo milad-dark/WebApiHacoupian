@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 
@@ -24,6 +27,11 @@ namespace WebApiHacoupian.Services
                 return true;
             }
             return false;
+        }
+
+        public async Task<TblInvoiceMasterDiscount> SelectByInvoiceId(long invoiceId)
+        {
+            return await _context.TblInvoiceMasterDiscounts.FirstOrDefaultAsync(i=>i.TblInvoiceMasterId == invoiceId);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApiHacoupian.Interfaces;
@@ -26,6 +27,12 @@ namespace WebApiHacoupian.Services
             return false;
         }
 
+        public async Task<IEnumerable<TblInvoiceMaster>> SelectInvoiceByPerson(string code, string fromDate, string toDate)
+        {
+            return await _context.TblInvoiceMasters.Where(i=> i.EffectiveCode == code && i.IsDeleted == false 
+            && i.InvoiceDate.ToGregorianDate() >= fromDate.ToGregorianDate() && i.InvoiceDate.ToGregorianDate() <= toDate.ToGregorianDate()).ToListAsync();
+        }
+
         public async Task<TblInvoiceMaster> SelectInvoiceMasterById(long id)
         {
             return await _context.TblInvoiceMasters.FindAsync(id);
@@ -34,6 +41,13 @@ namespace WebApiHacoupian.Services
         public long SelectLastNumberFactor(long placeType)
         {
             return  _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false).OrderByDescending(p => p.InvoiceNumber).FirstOrDefault().InvoiceNumber;
+        }
+
+        public async Task<IEnumerable<TblInvoiceMaster>> SelectReturnInvoiceByPerson(string code, string fromDate, string toDate)
+        {
+            return await _context.TblInvoiceMasters.Where(i => i.EffectiveCode == code && i.IsDeleted == false
+            && i.InvoiceDate.ToGregorianDate() >= fromDate.ToGregorianDate() && i.InvoiceDate.ToGregorianDate() <= toDate.ToGregorianDate() && i.ParentId > 0
+            ).ToListAsync();
         }
     }
 }
