@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,8 +30,9 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblInvoiceMaster>> SelectInvoiceByPerson(string code, string fromDate, string toDate)
         {
-            return await _context.TblInvoiceMasters.Where(i=> i.EffectiveCode == code && i.IsDeleted == false 
-            && i.InvoiceDate.ToGregorianDate() >= fromDate.ToGregorianDate() && i.InvoiceDate.ToGregorianDate() <= toDate.ToGregorianDate()).ToListAsync();
+            var invoice = await _context.TblInvoiceMasters.Where(i => i.EffectiveCode == code && i.IsDeleted == false).ToListAsync();
+
+            return invoice.Where(i=> i.InvoiceDate.ToGregorianDate() >= fromDate.ToGregorianDate() && i.InvoiceDate.ToGregorianDate() <= toDate.ToGregorianDate()).ToList();
         }
 
         public async Task<TblInvoiceMaster> SelectInvoiceMasterById(long id)
@@ -45,9 +47,9 @@ namespace WebApiHacoupian.Services
 
         public async Task<IEnumerable<TblInvoiceMaster>> SelectReturnInvoiceByPerson(string code, string fromDate, string toDate)
         {
-            return await _context.TblInvoiceMasters.Where(i => i.EffectiveCode == code && i.IsDeleted == false
-            && i.InvoiceDate.ToGregorianDate() >= fromDate.ToGregorianDate() && i.InvoiceDate.ToGregorianDate() <= toDate.ToGregorianDate() && i.ParentId > 0
-            ).ToListAsync();
+            var invoice = await _context.TblInvoiceMasters.Where(i => i.EffectiveCode == code && i.IsDeleted == false && i.ParentId > 0).ToListAsync();
+
+            return invoice.Where(i => i.InvoiceDate.ToGregorianDate() >= fromDate.ToGregorianDate() && i.InvoiceDate.ToGregorianDate() <= toDate.ToGregorianDate()).ToList();
         }
     }
 }
