@@ -11,5 +11,7 @@ namespace WebApiHacoupian.Interfaces
         /// <param name="id"></param>
         /// <returns></returns>
         Task<TblRawMaterialProduct> GetRawMaterialProduct(long id);
+        Task<TblRawMaterialProduct> GetRawMaterialProductByCode(string code);
+
     }
 }

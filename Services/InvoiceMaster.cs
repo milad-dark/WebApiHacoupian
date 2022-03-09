@@ -45,6 +45,11 @@ namespace WebApiHacoupian.Services
             return  _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false).OrderByDescending(p => p.InvoiceNumber).FirstOrDefault().InvoiceNumber;
         }
 
+        public long SelectLastNumberFactorReturn(long placeType)
+        {
+            return _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false && i.TblInitializedTypeId == 5).OrderByDescending(p => p.InvoiceNumber).FirstOrDefault().InvoiceNumber;
+        }
+
         public async Task<IEnumerable<TblInvoiceMaster>> SelectReturnInvoiceByPerson(string code, string fromDate, string toDate)
         {
             var invoice = await _context.TblInvoiceMasters.Where(i => i.EffectiveCode == code && i.IsDeleted == false && i.ParentId > 0).ToListAsync();

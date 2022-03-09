@@ -65,6 +65,7 @@ namespace WebApiHacoupian
             services.AddTransient<IProductionOrderTracking, ProductionOrderTracking>();
             services.AddTransient<IFinishedGoodProduct, FinishedGoodProduct>();
             services.AddTransient<IRawMaterialProduct, RawMaterialProduct>();
+            services.AddTransient<IRawMaterialStockSheetItem, RawMaterialStockSheetItem>();
             services.AddTransient<IProductionOrderMoreInfo, ProductionOrderMoreInfo>();
             services.AddTransient<ICodingPatternValue, CodingPatternValue>();
             services.AddTransient<ICodingPatternValueType, CodingPatternValueType>();

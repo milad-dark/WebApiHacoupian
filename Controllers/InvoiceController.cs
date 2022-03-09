@@ -178,7 +178,7 @@ namespace WebApiHacoupian.Controllers
                     }
 
                     var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
-                    var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948);//فروشگاه آنلاین (2948) - last Number
+                    var lastInvoice = _invoiceMaster.SelectLastNumberFactorReturn(2948);//فروشگاه آنلاین (2948) - last Number
                     Int32 totalTax = 0;
                     foreach (var item in onlineShop.order_items)
                     {
@@ -201,7 +201,7 @@ namespace WebApiHacoupian.Controllers
                         InvoiceDate = dateInvoice.ToShamsi(),
                         InvoiceDateTime = dateInvoice,
                         InvoiceTime = dateInvoice.TimeOfDay,
-                        InvoiceNumber = (lastInvoice != 0) ? lastInvoice + 1 : 1,
+                        InvoiceNumber = (lastInvoice != 0) ? lastInvoice + 1 : 0,
                         InvoiceTo = onlineShop.user_name,
                         ParentIdFromReturn = 0,
                         ParentId = onlineShop.invoice_id,
