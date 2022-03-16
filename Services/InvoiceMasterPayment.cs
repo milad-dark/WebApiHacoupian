@@ -1,4 +1,7 @@
-﻿using WebApiHacoupian.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
 
 namespace WebApiHacoupian.Services
@@ -20,6 +23,11 @@ namespace WebApiHacoupian.Services
                 return true;
             }
             return false;
+        }
+
+        public async Task<TblInvoiceMasterPayment> SelectByInvoiceId(long invoice_id)
+        {
+           return await _context.TblInvoiceMasterPayments.FirstOrDefaultAsync(i=>i.TblInvoiceMasterId == invoice_id);
         }
     }
 }

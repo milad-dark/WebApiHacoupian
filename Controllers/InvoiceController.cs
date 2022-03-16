@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WebApiHacoupian.Extention;
 using WebApiHacoupian.Interfaces;
 using WebApiHacoupian.Models;
@@ -81,10 +82,30 @@ namespace WebApiHacoupian.Controllers
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948);//فروشگاه آنلاین (2948) - last Number
                     int invoiceNumberFile = new JsonFileCreator(_webHostEnvironment).GetJson(number: lastInvoice++.ToString());
                     Int32 totalTax = 0;
+                    double salePrice = 0;
+                    double discounts = 0;
 
-                    foreach (var item in onlineShop.order_items)
+                    if (onlineShop.discounts.Count > 0)
                     {
-                        totalTax += (Int32)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero);
+                        foreach (var item in onlineShop.order_items)
+                        {
+                            salePrice += (item.price / 1.09);
+                            totalTax += (Int32)Utility.RoundMoney((item.price / 1.09) * 0.09);
+                        }
+                        foreach (var dis in onlineShop.discounts)
+                        {
+                            discounts += dis.price;
+                        }
+                        totalTax = (Int32)Utility.RoundMoney((salePrice - discounts) * 0.09);
+                    }
+                    else
+                    {
+                        foreach (var item in onlineShop.order_items)
+                        {
+                            totalTax += (Int32)Utility.RoundMoney((item.price / 1.09) * 0.09);
+
+                            //totalTax += (Int32)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero);
+                        }
                     }
 
                     if (invoiceNumberFile == 0) lastInvoice++;
@@ -170,25 +191,27 @@ namespace WebApiHacoupian.Controllers
 
                 try
                 {
+                    var oldInvoice = _invoiceMaster.SelectInvoiceMasterById(onlineShop.invoice_id).Result;
+                    var oldSlave = _invoiceSlave.GetInvoiceSlaves(onlineShop.invoice_id).Result;
+                    var oldDiscount = _invoiceMasterDiscount.SelectByInvoiceId(onlineShop.invoice_id).Result;
+                    var oldPeyment = _invoiceMasterPayment.SelectByInvoiceId(onlineShop.invoice_id).Result;
+                    List<InvoiceSlave> slaves = new List<InvoiceSlave>();
+
                     //Check Product list existed in DB
-                    foreach (var item in onlineShop.order_items)
+                    foreach (var item in oldSlave)
                     {
-                        var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.barcode).Result;
-                        if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.barcode));
+                        var finishedProduct = _finishedGoodProduct.GetFinishedGoodProductByCode(item.PartCode).Result;
+                        if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.PartCount));
                     }
 
                     var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactorReturn(2948);//فروشگاه آنلاین (2948) - last Number
-                    Int32 totalTax = 0;
-                    foreach (var item in onlineShop.order_items)
-                    {
-                        totalTax += (Int32)Math.Round((item.price / 1.09) * 0.09, 0, MidpointRounding.AwayFromZero);
-                    }
+
                     var invoiceMaster = new TblInvoiceMaster
                     {
-                        TblCompanyIdAsOwner = onlineShop.orgin,//هاکوپیان(2) و نوراشن(907) است
-                        TblCompanyIdAsReceiver = onlineShop.orgin,
-                        TblCompanyIdAsIssuer = onlineShop.orgin,
+                        TblCompanyIdAsOwner = oldInvoice.TblCompanyIdAsOwner,//هاکوپیان(2) و نوراشن(907) است
+                        TblCompanyIdAsReceiver = oldInvoice.TblCompanyIdAsReceiver,
+                        TblCompanyIdAsIssuer = oldInvoice.TblCompanyIdAsIssuer,
                         TblPlaceTypeIdAsIssuer = 2948,//فروشگاه آنلاین (2948)
                         TblPlaceTypeIdAsReceiver = 2948,//فروشگاه آنلاین (2948)
                         TblPersonIdAsIssuer = 523841,//زاهدی
@@ -198,17 +221,17 @@ namespace WebApiHacoupian.Controllers
                         TblInvoiceRegistrarId = 34,//فروشگاه آنلاین
                         TblInvoiceStatusId = 1,
                         TblPersonId = 523841,
-                        InvoiceDate = dateInvoice.ToShamsi(),
-                        InvoiceDateTime = dateInvoice,
-                        InvoiceTime = dateInvoice.TimeOfDay,
+                        InvoiceDate = oldInvoice.InvoiceDate,
+                        InvoiceDateTime = oldInvoice.InvoiceDateTime,
+                        InvoiceTime = oldInvoice.InvoiceTime,
                         InvoiceNumber = (lastInvoice != 0) ? lastInvoice + 1 : 0,
-                        InvoiceTo = onlineShop.user_name,
+                        InvoiceTo = oldInvoice.InvoiceTo,
                         ParentIdFromReturn = 0,
                         ParentId = onlineShop.invoice_id,
-                        EffectiveCode = onlineShop.user_code,
-                        Comment = onlineShop.invoice_number.ToString(),
+                        EffectiveCode = oldInvoice.EffectiveCode,
+                        Comment = oldInvoice.Comment,
                         TaxPercent = "0.09",
-                        Tax = totalTax.ToString(),
+                        Tax = oldInvoice.Tax,
                         CanBeReturned = false,
                         Explanation = "From Online Shop Returned",
                         Status = 1,
@@ -219,12 +242,13 @@ namespace WebApiHacoupian.Controllers
                     _invoiceMaster.Insert(invoiceMaster);
                     var id = invoiceMaster.Id;
 
+
                     //Insert Slave
-                    InsertSlaves(onlineShop.order_items, id);
+                    _invoiceSlave.InsertListSlave(oldSlave.ToList(), id);
                     //Insert Discount
-                    InsertDiscounts(onlineShop.discounts, id);
+                    //_invoiceMasterDiscount.InsertListDiscount(oldDiscount, id);
                     //Insert Payment
-                    InsertPayment(onlineShop.payment, id);
+                    InsertPayment((double)oldPeyment.Amount, id);
                     //Insert Stock Sheet and Item
                     var stockId = InsertStockSheet(invoiceMaster, true);
                     InsertStockItem(stockId, (List<TblInvoiceSlave>)_invoiceSlave.GetInvoiceSlaves(id).Result);

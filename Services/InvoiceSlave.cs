@@ -31,5 +31,17 @@ namespace WebApiHacoupian.Services
             }
             return false;
         }
+
+        public bool InsertListSlave(List<TblInvoiceSlave> invoiceSlave, long invoiceId)
+        {
+            foreach (TblInvoiceSlave item in invoiceSlave)
+            {
+                item.TblInvoiceMasterId = invoiceId;
+                _context.TblInvoiceSlaves.Add(item);
+            }
+            _context.SaveChanges();
+       
+            return false;
+        }
     }
 }
