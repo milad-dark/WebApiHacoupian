@@ -40,6 +40,11 @@ namespace WebApiHacoupian.Services
             return await _context.TblInvoiceMasters.FindAsync(id);
         }
 
+        public async Task<TblInvoiceMaster> SelectInvoiceMasterParentById(long id)
+        {
+            return await _context.TblInvoiceMasters.FirstOrDefaultAsync(i => i.ParentId == id);
+        }
+
         public long SelectLastNumberFactor(long placeType)
         {
             return  _context.TblInvoiceMasters.Where(i => i.TblPlaceTypeIdAsIssuer == placeType && i.IsDeleted == false).OrderByDescending(p => p.InvoiceNumber).FirstOrDefault().InvoiceNumber;

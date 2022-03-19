@@ -37,6 +37,7 @@ namespace WebApiHacoupian.Services
             foreach (TblInvoiceSlave item in invoiceSlave)
             {
                 item.TblInvoiceMasterId = invoiceId;
+                item.Id = 0;
                 _context.TblInvoiceSlaves.Add(item);
             }
             _context.SaveChanges();

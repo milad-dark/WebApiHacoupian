@@ -29,9 +29,26 @@ namespace WebApiHacoupian.Services
             return false;
         }
 
+        public bool InsertListDiscount(List<TblInvoiceMasterDiscount> invoiceMasterDiscount, long invoiceId)
+        {
+            foreach (TblInvoiceMasterDiscount item in invoiceMasterDiscount)
+            {
+                item.TblInvoiceMasterId = invoiceId;
+                item.Id = 0;
+                _context.TblInvoiceMasterDiscounts.Add(item);
+            }
+            _context.SaveChanges();
+
+            return false;
+        }
+
         public async Task<TblInvoiceMasterDiscount> SelectByInvoiceId(long invoiceId)
         {
             return await _context.TblInvoiceMasterDiscounts.FirstOrDefaultAsync(i=>i.TblInvoiceMasterId == invoiceId);
+        }
+        public async Task<IEnumerable<TblInvoiceMasterDiscount>> SelectListByInvoiceId(long invoiceId)
+        {
+            return await _context.TblInvoiceMasterDiscounts.Where(i => i.TblInvoiceMasterId == invoiceId).ToListAsync();
         }
     }
 }

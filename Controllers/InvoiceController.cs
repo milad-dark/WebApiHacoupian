@@ -179,21 +179,15 @@ namespace WebApiHacoupian.Controllers
                 if (onlineShop.invoice_id == 0)
                     return BadRequest("فاکتور فاقد آیدی دات نت میباشد");
                 if (_invoiceMaster.SelectInvoiceMasterById(onlineShop.invoice_id).Result == null)
-                    return BadRequest("فاکتور با این آیدی دات نت یافت نشد");
-                if (onlineShop.order_items.Count == 0)
-                    return BadRequest("فاکتور بدون آیتم میباشد");
-                if (string.IsNullOrEmpty(onlineShop.user_name) || string.IsNullOrEmpty(onlineShop.user_code))
-                    return BadRequest("تام مشترک یا کد مشترک خالی/صفر میباشد");
-                if (onlineShop.invoice_number == 0)
-                    return BadRequest("فاکتور فاقد شماره میباشد");
-                if (onlineShop.payment == 0)
-                    return BadRequest("فاکتور فاقد پرداختی میباشد");
+                    return NotFound("فاکتور با این آیدی دات نت یافت نشد");
+                if (_invoiceMaster.SelectInvoiceMasterParentById(onlineShop.invoice_id).Result != null)
+                    return Conflict("فاکتور با این آیدی دات نت قبلا مرجوع شده است");
 
                 try
                 {
                     var oldInvoice = _invoiceMaster.SelectInvoiceMasterById(onlineShop.invoice_id).Result;
                     var oldSlave = _invoiceSlave.GetInvoiceSlaves(onlineShop.invoice_id).Result;
-                    var oldDiscount = _invoiceMasterDiscount.SelectByInvoiceId(onlineShop.invoice_id).Result;
+                    var oldDiscount = _invoiceMasterDiscount.SelectListByInvoiceId(onlineShop.invoice_id).Result;
                     var oldPeyment = _invoiceMasterPayment.SelectByInvoiceId(onlineShop.invoice_id).Result;
                     List<InvoiceSlave> slaves = new List<InvoiceSlave>();
 
@@ -204,7 +198,6 @@ namespace WebApiHacoupian.Controllers
                         if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.PartCount));
                     }
 
-                    var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactorReturn(2948);//فروشگاه آنلاین (2948) - last Number
 
                     var invoiceMaster = new TblInvoiceMaster
@@ -246,7 +239,7 @@ namespace WebApiHacoupian.Controllers
                     //Insert Slave
                     _invoiceSlave.InsertListSlave(oldSlave.ToList(), id);
                     //Insert Discount
-                    //_invoiceMasterDiscount.InsertListDiscount(oldDiscount, id);
+                    _invoiceMasterDiscount.InsertListDiscount(oldDiscount.ToList(), id);
                     //Insert Payment
                     InsertPayment((double)oldPeyment.Amount, id);
                     //Insert Stock Sheet and Item
