@@ -11,8 +11,8 @@ namespace WebApiHacoupian.ViewModel
         public string user_code { get; set; }
         //Customer Name
         public string user_name { get; set; }
-        //Created DateTime (epouch or timestamp)
-        public double date { get; set; }
+        //Created DateTime (epouch or timestamp) or string '2022-2-28'
+        public string date { get; set; }
         //Invoice Number '223'
         public long invoice_number { get; set; }
         //Invoice Price Payment '105840000 R'
@@ -28,9 +28,7 @@ namespace WebApiHacoupian.ViewModel
     public class OnlineShopReturnedModel
     {
         //dot net Invoice id '6523110'
-        public long invoice_id { get; set; }
-
-
+        public int invoice_id { get; set; }
     }
     public class Discounts
     {

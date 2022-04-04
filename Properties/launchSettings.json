@@ -21,7 +21,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "jsWebView2Debugging": false,
-      "nativeDebugging": true
+      "nativeDebugging": false
     },
     "WebApiHacoupian": {
       "commandName": "Project",

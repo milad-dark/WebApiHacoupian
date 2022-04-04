@@ -16,7 +16,7 @@ namespace WebApiHacoupian.Interfaces
         bool Insert(TblInvoiceMaster invoiceMaster);
 
         long SelectLastNumberFactor(long placeType);
-        long SelectLastNumberFactorReturn(long placeType);
+        TblInvoiceMaster SelectLastNumberFactorReturn(long placeType);
 
     }
 }

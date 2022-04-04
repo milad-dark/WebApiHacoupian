@@ -78,7 +78,8 @@ namespace WebApiHacoupian.Controllers
                         if (finishedProduct == null) return BadRequest(string.Format("آیتم {0} در کالاها موجود نیست", item.barcode));
                     }
 
-                    var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
+                    var dateInvoice = Convert.ToDateTime(onlineShop.date);
+                    //var dateInvoice = EpouchConvertor.EpouchToDateTime(onlineShop.date);
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactor(2948);//فروشگاه آنلاین (2948) - last Number
                     int invoiceNumberFile = new JsonFileCreator(_webHostEnvironment).GetJson(number: lastInvoice++.ToString());
                     Int32 totalTax = 0;
@@ -170,25 +171,25 @@ namespace WebApiHacoupian.Controllers
         }
 
         [HttpPost("Returned")]// returned invoice from online shop
-        public ActionResult Returned([FromBody] OnlineShopReturnedModel onlineShop)
+        public ActionResult Returned([FromQuery(Name = "invoice_id")] int invoice_id)
         {
-            if (ModelState.IsValid)
-            {
-                _logger.LogInformation("Data Invoice Returned: ", onlineShop);
+            //if (onlineShop.invoice_id > 0)
+            //{
+                _logger.LogInformation($"Data Invoice Returned: {invoice_id}");
 
-                if (onlineShop.invoice_id == 0)
+                if (invoice_id == 0)
                     return BadRequest("فاکتور فاقد آیدی دات نت میباشد");
-                if (_invoiceMaster.SelectInvoiceMasterById(onlineShop.invoice_id).Result == null)
+                if (_invoiceMaster.SelectInvoiceMasterById(invoice_id).Result == null)
                     return NotFound("فاکتور با این آیدی دات نت یافت نشد");
-                if (_invoiceMaster.SelectInvoiceMasterParentById(onlineShop.invoice_id).Result != null)
+                if (_invoiceMaster.SelectInvoiceMasterParentById(invoice_id).Result != null)
                     return Conflict("فاکتور با این آیدی دات نت قبلا مرجوع شده است");
 
                 try
                 {
-                    var oldInvoice = _invoiceMaster.SelectInvoiceMasterById(onlineShop.invoice_id).Result;
-                    var oldSlave = _invoiceSlave.GetInvoiceSlaves(onlineShop.invoice_id).Result;
-                    var oldDiscount = _invoiceMasterDiscount.SelectListByInvoiceId(onlineShop.invoice_id).Result;
-                    var oldPeyment = _invoiceMasterPayment.SelectByInvoiceId(onlineShop.invoice_id).Result;
+                    var oldInvoice = _invoiceMaster.SelectInvoiceMasterById(invoice_id).Result;
+                    var oldSlave = _invoiceSlave.GetInvoiceSlaves(invoice_id).Result;
+                    var oldDiscount = _invoiceMasterDiscount.SelectListByInvoiceId(invoice_id).Result;
+                    var oldPeyment = _invoiceMasterPayment.SelectByInvoiceId(invoice_id).Result;
                     List<InvoiceSlave> slaves = new List<InvoiceSlave>();
 
                     //Check Product list existed in DB
@@ -199,7 +200,7 @@ namespace WebApiHacoupian.Controllers
                     }
 
                     var lastInvoice = _invoiceMaster.SelectLastNumberFactorReturn(2948);//فروشگاه آنلاین (2948) - last Number
-
+                    
                     var invoiceMaster = new TblInvoiceMaster
                     {
                         TblCompanyIdAsOwner = oldInvoice.TblCompanyIdAsOwner,//هاکوپیان(2) و نوراشن(907) است
@@ -214,13 +215,13 @@ namespace WebApiHacoupian.Controllers
                         TblInvoiceRegistrarId = 34,//فروشگاه آنلاین
                         TblInvoiceStatusId = 1,
                         TblPersonId = 523841,
-                        InvoiceDate = oldInvoice.InvoiceDate,
-                        InvoiceDateTime = oldInvoice.InvoiceDateTime,
-                        InvoiceTime = oldInvoice.InvoiceTime,
-                        InvoiceNumber = (lastInvoice != 0) ? lastInvoice + 1 : 0,
+                        InvoiceDate = DateTime.Now.ToShamsi(),
+                        InvoiceDateTime = DateTime.Now,
+                        InvoiceTime = DateTime.Now.TimeOfDay,
+                        InvoiceNumber = (lastInvoice != null) ? lastInvoice.InvoiceNumber + 1 : 1,
                         InvoiceTo = oldInvoice.InvoiceTo,
                         ParentIdFromReturn = 0,
-                        ParentId = onlineShop.invoice_id,
+                        ParentId = invoice_id,
                         EffectiveCode = oldInvoice.EffectiveCode,
                         Comment = oldInvoice.Comment,
                         TaxPercent = "0.09",
@@ -253,10 +254,10 @@ namespace WebApiHacoupian.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError($"Insert Invoice error: {ex.Message} - {ex.InnerException}");
-                    BadRequest(ex.Message);
+                    return BadRequest(ex.Message);
                 }
-            }
-            return BadRequest();
+            //}
+            //return BadRequest("invalid model");
         }
         //Insert Order Items To TblInvoiceSlave
         private void InsertSlaves(List<InvoiceSlave> invoiceSlave, long invoiceMasterId)
